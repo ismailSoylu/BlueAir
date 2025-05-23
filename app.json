@@ -41,7 +41,6 @@
       "typedRoutes": true
     },
     "extra": {
-      "openWeatherApiKey": "4a67aa6743cc1fff59aac7b4567c5355",
       "router": {},
       "eas": {
         "projectId": "85bd3f77-8dda-47f3-af54-dec3fa193c15"
