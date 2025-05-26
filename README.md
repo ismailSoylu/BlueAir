@@ -29,7 +29,6 @@ Users can view current weather and 5-day forecasts based on city name or their c
 - TypeScript
 - OpenWeatherMap API
 - AsyncStorage
-- Lottie Animations
 
 ---
 
