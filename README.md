@@ -31,3 +31,26 @@ Users can view current weather and 5-day forecasts based on city name or their c
 git clone https://github.com/ismailsoylu/BlueAir.git
 cd BlueAir
 npm install
+## 🤝 Contributing
+
+Contributions are welcome! Please follow these steps:
+
+1. Fork this repository.
+2. Create a new branch (`git checkout -b feature/your-feature`).
+3. Commit your changes (`git commit -m 'Add new feature'`).
+4. Push to the branch (`git push origin feature/your-feature`).
+5. Open a Pull Request.
+
+---
+
+## 📄 License
+
+This project is licensed under the [MIT License](LICENSE).
+
+---
+
+## 📬 Contact
+
+For questions or suggestions, feel free to reach out:
+
+- Email: ismailsoylu0405@gmail.com
