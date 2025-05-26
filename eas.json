@@ -12,10 +12,16 @@
       "distribution": "internal",
       "android": {
         "buildType": "apk"
+      },
+      "env": {
+        "OPEN_WEATHER_API_KEY": "REPLACE_ME"
       }
     },
     "production": {
-      "autoIncrement": true
+      "autoIncrement": true,
+      "env": {
+        "OPEN_WEATHER_API_KEY": "REPLACE_ME"
+      }
     }
   },
   "submit": {
