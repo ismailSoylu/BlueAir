@@ -9,11 +9,13 @@ import { LanguageContext, ThemeContext } from './(tabs)/home';
 
 import { useColorScheme } from '@/hooks/useColorScheme';
 
+type Lang = 'tr' | 'en' | 'ja' | 'de';
+
 export default function RootLayout() {
   const colorScheme = useColorScheme();
   const [theme, setTheme] = useState<'light' | 'dark' | 'auto'>('auto');
   const [isDark, setIsDark] = useState(false);
-  const [lang, setLang] = useState<'tr' | 'en'>('tr');
+  const [lang, setLang] = useState<Lang>('tr');
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
@@ -28,8 +30,13 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (theme === 'auto') {
-      const hour = new Date().getHours();
-      setIsDark(colorScheme === 'dark' || hour < 7 || hour > 19);
+      const updateTheme = () => {
+        const hour = new Date().getHours();
+        setIsDark(colorScheme === 'dark' || hour < 7 || hour > 19);
+      };
+      updateTheme();
+      const interval = setInterval(updateTheme, 60 * 1000);
+      return () => clearInterval(interval);
     } else {
       setIsDark(theme === 'dark');
     }
