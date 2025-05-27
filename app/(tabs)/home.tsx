@@ -4,7 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import * as Location from 'expo-location';
 import { StatusBar } from 'expo-status-bar';
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { ActivityIndicator, Image, Keyboard, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Image, Keyboard, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, ViewStyle } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ForecastData, ForecastItem, get5DayForecastByCity, get5DayForecastByLocation, getWeatherByCity, getWeatherByLocation, WeatherData } from '../../services/weatherService';
 
@@ -346,6 +346,23 @@ export default function HomeScreen() {
         : ''
     ).join(' ');
 
+  // getModernForecastIconStyle fonksiyonu View için olacak, Image için sadece boyut verilecek
+  const getModernForecastIconStyle = (isDark: boolean): ViewStyle => ({
+    width: 72,
+    height: 72,
+    marginBottom: 8,
+    backgroundColor: isDark ? '#232a36' : '#b3c6f7',
+    borderRadius: 36,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    elevation: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
+  });
+  const iconImageStyle = { width: 56, height: 56 };
+
   return (
     <>
       <LinearGradient
@@ -418,13 +435,13 @@ export default function HomeScreen() {
                   </ScrollView>
                 )}
                 <View style={styles.buttonRow}>
-                  <TouchableOpacity style={styles.button} onPress={() => fetchWeather()}>
+                  <TouchableOpacity style={[styles.button, {flex: 1, marginRight: 6, minWidth: 0}]} onPress={() => fetchWeather()}>
                     <MaterialCommunityIcons name="magnify" size={22} color="#fff" />
-                    <Text style={styles.buttonText}>{t('search')}</Text>
+                    <Text style={styles.buttonText} numberOfLines={1} ellipsizeMode="tail">{t('search')}</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity style={styles.locationButton} onPress={fetchWeatherByLocation}>
+                  <TouchableOpacity style={[styles.locationButton, {flex: 1, marginLeft: 6, minWidth: 0}]} onPress={fetchWeatherByLocation}>
                     <MaterialCommunityIcons name="map-marker" size={22} color="#fff" />
-                    <Text style={styles.buttonText}>{t('findByLocation')}</Text>
+                    <Text style={styles.buttonText} numberOfLines={1} ellipsizeMode="tail">{t('findByLocation')}</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -441,10 +458,12 @@ export default function HomeScreen() {
                 <View style={styles.weatherCard}>
                   <Text style={styles.cityName}>{turkceSehirAdi(weather.name)}</Text>
                   <View style={styles.tempRow}>
-                    <Image
-                      source={{ uri: `https://openweathermap.org/img/wn/${weather.weather[0].icon}@4x.png` }}
-                      style={styles.weatherIconBig}
-                    />
+                    <View style={getModernForecastIconStyle(isDark)}>
+                      <Image
+                        source={{ uri: `https://openweathermap.org/img/wn/${weather.weather[0].icon}@4x.png` }}
+                        style={iconImageStyle}
+                      />
+                    </View>
                     <View>
                       <Text style={styles.temperature}>{Math.round(weather.main.temp)}°C</Text>
                       <Text
@@ -483,10 +502,12 @@ export default function HomeScreen() {
                     {getDailyForecast(forecast.list).map(item => (
                       <View style={styles.modernForecastItem} key={item.dt}>
                         <Text style={styles.modernForecastDay}>{new Date(item.dt_txt).toLocaleDateString(lang === 'de' ? 'de-DE' : lang === 'ja' ? 'ja-JP' : lang === 'en' ? 'en-US' : 'tr-TR', { weekday: 'short', day: 'numeric', month: 'short' })}</Text>
-                        <Image
-                          source={{ uri: `https://openweathermap.org/img/wn/${item.weather[0].icon}@4x.png` }}
-                          style={styles.modernForecastIcon}
-                        />
+                        <View style={getModernForecastIconStyle(isDark)}>
+                          <Image
+                            source={{ uri: `https://openweathermap.org/img/wn/${item.weather[0].icon}@4x.png` }}
+                            style={iconImageStyle}
+                          />
+                        </View>
                         <Text style={styles.modernForecastTemp}>{Math.round(item.main.temp)}°C</Text>
                         <Text style={styles.modernForecastDesc} numberOfLines={2} ellipsizeMode="tail">{formatDescription(item.weather[0].description)}</Text>
                       </View>
@@ -503,10 +524,12 @@ export default function HomeScreen() {
                       {forecast.list.slice(0, 8).map(item => (
                         <View style={styles.modernForecastItem} key={item.dt + '-hourly'}>
                           <Text style={styles.modernForecastDay}>{new Date(item.dt_txt).toLocaleTimeString(lang === 'de' ? 'de-DE' : lang === 'ja' ? 'ja-JP' : lang === 'en' ? 'en-US' : 'tr-TR', { hour: '2-digit', minute: '2-digit' })}</Text>
-                          <Image
-                            source={{ uri: `https://openweathermap.org/img/wn/${item.weather[0].icon}@4x.png` }}
-                            style={styles.modernForecastIcon}
-                          />
+                          <View style={getModernForecastIconStyle(isDark)}>
+                            <Image
+                              source={{ uri: `https://openweathermap.org/img/wn/${item.weather[0].icon}@4x.png` }}
+                              style={iconImageStyle}
+                            />
+                          </View>
                           <Text style={styles.modernForecastTemp}>{Math.round(item.main.temp)}°C</Text>
                           <Text style={styles.modernForecastDesc} numberOfLines={2} ellipsizeMode="tail">{formatDescription(item.weather?.[0]?.description || '')}</Text>
                         </View>
@@ -542,7 +565,9 @@ const styles = StyleSheet.create({
   darkText: { color: '#fff' },
   buttonRow: {
     flexDirection: 'row',
-    justifyContent: 'center',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '100%',
     marginVertical: 12,
   },
   button: {
@@ -673,9 +698,18 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   modernForecastIcon: {
-    width: 48,
-    height: 48,
-    marginBottom: 6,
+    width: 72,
+    height: 72,
+    marginBottom: 8,
+    backgroundColor: '#fff',
+    borderRadius: 36,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    elevation: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   modernForecastTemp: {
     fontSize: 22,
