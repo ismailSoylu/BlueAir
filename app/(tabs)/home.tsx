@@ -182,6 +182,23 @@ TaskManager.defineTask(WEATHER_TASK, async () => {
   }
 });
 
+// Türkçe karakterleri İngilizce'ye çeviren fonksiyon
+function turkceKarakterleriDonustur(str: string) {
+  return str
+    .replace(/ğ/g, 'g')
+    .replace(/Ğ/g, 'G')
+    .replace(/ü/g, 'u')
+    .replace(/Ü/g, 'U')
+    .replace(/ş/g, 's')
+    .replace(/Ş/g, 'S')
+    .replace(/ı/g, 'i')
+    .replace(/İ/g, 'I')
+    .replace(/ö/g, 'o')
+    .replace(/Ö/g, 'O')
+    .replace(/ç/g, 'c')
+    .replace(/Ç/g, 'C');
+}
+
 export default function HomeScreen() {
   const { theme, isDark } = useContext(ThemeContext);
   const { lang, setLang } = useContext(LanguageContext);
@@ -246,11 +263,13 @@ export default function HomeScreen() {
   };
 
   const fetchWeather = async (cityName?: string) => {
-    const searchCity = cityName ?? city;
+    let searchCity = cityName ?? city;
     if (!searchCity.trim()) {
       setError(t('errorNoCity'));
       return;
     }
+    // Türkçe karakterleri dönüştür
+    searchCity = turkceKarakterleriDonustur(searchCity.trim());
     setLoading(true);
     setError('');
     try {
@@ -299,6 +318,7 @@ export default function HomeScreen() {
 
   // Şehir adını Türkçeleştiren yardımcı fonksiyon
   const turkceSehirAdi = (name: string) => {
+    name = name.trim();
     const map: Record<string, string> = {
       'Istanbul': 'İstanbul',
       'Izmir': 'İzmir',
@@ -316,6 +336,8 @@ export default function HomeScreen() {
       'Sirnak': 'Şırnak',
       'Tekirdag': 'Tekirdağ',
       'Zonguldak': 'Zonguldak',
+      'Siliviri': 'Silivri',
+      'Rome': 'Roma',
       // ... gerekirse ekle ...
     };
     return map[name] || name;
@@ -343,8 +365,16 @@ export default function HomeScreen() {
   const onCityInputChange = (text: string) => {
     setCity(text);
     if (text.length > 0) {
-      const filtered = CITY_LIST.filter(c => c.toLowerCase().startsWith(text.toLowerCase()) && c.toLowerCase() !== text.toLowerCase());
-      setCitySuggestions([...recentCities.filter(c => c.toLowerCase().startsWith(text.toLowerCase())), ...filtered].slice(0, 5));
+      const normalizedText = text.toLowerCase().trim();
+      const filtered = CITY_LIST.filter(c => {
+        const normalizedCity = c.toLowerCase().trim();
+        return normalizedCity.startsWith(normalizedText) && normalizedCity !== normalizedText;
+      });
+      const recentFiltered = recentCities.filter(c => {
+        const normalizedCity = c.toLowerCase().trim();
+        return normalizedCity.startsWith(normalizedText);
+      });
+      setCitySuggestions([...recentFiltered, ...filtered].slice(0, 5));
     } else {
       setCitySuggestions(recentCities);
     }
