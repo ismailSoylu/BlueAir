@@ -1,8 +1,12 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as BackgroundFetch from 'expo-background-fetch';
+import Constants from 'expo-constants';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Location from 'expo-location';
+import * as Notifications from 'expo-notifications';
 import { StatusBar } from 'expo-status-bar';
+import * as TaskManager from 'expo-task-manager';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { ActivityIndicator, Image, Keyboard, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, ViewStyle } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -10,6 +14,7 @@ import { ForecastData, ForecastItem, get5DayForecastByCity, get5DayForecastByLoc
 
 const THEME_KEY = 'APP_THEME';
 const RECENT_CITIES_KEY = 'RECENT_CITIES';
+const WEATHER_TASK = 'background-weather-task';
 
 // Tema contexti
 export const ThemeContext = createContext({
@@ -156,6 +161,27 @@ const capitalize = (s: string) => s && s.length > 0 ? s.charAt(0).toUpperCase() 
 // Açıklamadaki tüm kelimelerin baş harfini büyüten yardımcı fonksiyon
 const capitalizeAll = (s: string) => s.replace(/\b\w/g, c => c.toUpperCase());
 
+TaskManager.defineTask(WEATHER_TASK, async () => {
+  try {
+    let { status } = await Location.getForegroundPermissionsAsync();
+    if (status !== 'granted') return BackgroundFetch.BackgroundFetchResult.NoData;
+    let location = await Location.getCurrentPositionAsync({});
+    const API_KEY = Constants.expoConfig?.extra?.OPEN_WEATHER_API_KEY;
+    const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${location.coords.latitude}&lon=${location.coords.longitude}&appid=${API_KEY}&units=metric&lang=tr`);
+    const data = await response.json();
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: `${data.name}: ${Math.round(data.main.temp)}°C, ${data.weather[0].description}`,
+        body: `Rüzgar: ${(data.wind.speed * 3.6).toFixed(1)} km/h`,
+      },
+      trigger: null,
+    });
+    return BackgroundFetch.BackgroundFetchResult.NewData;
+  } catch (e) {
+    return BackgroundFetch.BackgroundFetchResult.Failed;
+  }
+});
+
 export default function HomeScreen() {
   const { theme, isDark } = useContext(ThemeContext);
   const { lang, setLang } = useContext(LanguageContext);
@@ -168,6 +194,7 @@ export default function HomeScreen() {
   const [favorites, setFavorites] = useState<string[]>([]);
   const [citySuggestions, setCitySuggestions] = useState<string[]>([]);
   const [recentCities, setRecentCities] = useState<string[]>([]);
+  const [currentTime, setCurrentTime] = useState(new Date());
 
   // Favori şehirleri yükle
   useEffect(() => {
@@ -363,6 +390,24 @@ export default function HomeScreen() {
   });
   const iconImageStyle = { width: 56, height: 56 };
 
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  // useEffect ile izinleri ve task başlatmayı ekle
+  useEffect(() => {
+    (async () => {
+      await Notifications.requestPermissionsAsync();
+      await Location.requestForegroundPermissionsAsync();
+      await BackgroundFetch.registerTaskAsync(WEATHER_TASK, {
+        minimumInterval: 60 * 60, // 1 saat (Expo'da minimum 15dk)
+        stopOnTerminate: false,
+        startOnBoot: true,
+      });
+    })();
+  }, []);
+
   return (
     <>
       <LinearGradient
@@ -378,6 +423,9 @@ export default function HomeScreen() {
             <ScrollView contentContainerStyle={{ paddingBottom: 40, paddingHorizontal: 8 }} showsVerticalScrollIndicator={false}>
               <StatusBar style={isDark ? 'light' : 'dark'} />
               <Text style={[styles.title, isDark && styles.darkText]}>{t('weather')}</Text>
+              <Text style={{textAlign: 'center', fontSize: 15, color: isDark ? '#fff' : '#222', marginBottom: 4}}>
+                {currentTime.toLocaleTimeString()}
+              </Text>
               {/* Favori şehirler kutusu */}
               {favorites.length > 0 && (
                 <View style={[styles.favBox, isDark && styles.darkFavBox]}>
@@ -458,7 +506,7 @@ export default function HomeScreen() {
                 <View style={styles.weatherCard}>
                   <Text style={styles.cityName}>{turkceSehirAdi(weather.name)}</Text>
                   <View style={styles.tempRow}>
-                    <View style={getModernForecastIconStyle(isDark)}>
+                    <View style={[getModernForecastIconStyle(isDark), { marginRight: 20 }]}>
                       <Image
                         source={{ uri: `https://openweathermap.org/img/wn/${weather.weather[0].icon}@4x.png` }}
                         style={iconImageStyle}
