@@ -7,8 +7,9 @@ import * as Location from 'expo-location';
 import * as Notifications from 'expo-notifications';
 import { StatusBar } from 'expo-status-bar';
 import * as TaskManager from 'expo-task-manager';
+import LottieView from 'lottie-react-native';
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { ActivityIndicator, Image, Keyboard, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, ViewStyle } from 'react-native';
+import { ActivityIndicator, Keyboard, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, ViewStyle } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ForecastData, ForecastItem, get5DayForecastByCity, get5DayForecastByLocation, getWeatherByCity, getWeatherByLocation, WeatherData } from '../../services/weatherService';
 
@@ -60,6 +61,10 @@ export const translations = {
     info: 'Otomatik modda sistem teması veya saat (19:00-07:00 arası) koyu mod olarak uygulanır.',
     loading: 'Veri yükleniyor...',
     noData: 'Veri yok',
+    districtNotFound: '{district} bulunamadı, {city} için hava durumu gösteriliyor.',
+    pressure: 'Basınç',
+    sunrise: 'G. Doğumu',
+    sunset: 'G. Batımı',
   },
   en: {
     weather: 'Weather',
@@ -88,6 +93,10 @@ export const translations = {
     info: 'In auto mode, system theme or time (19:00-07:00) will be dark.',
     loading: 'Loading data...',
     noData: 'No data',
+    districtNotFound: '{district} not found, showing weather for {city}.',
+    pressure: 'Pressure',
+    sunrise: 'Sunrise',
+    sunset: 'Sunset',
   },
   ja: {
     weather: '天気',
@@ -116,6 +125,10 @@ export const translations = {
     info: '自動モードでは、システムテーマまたは時間（19:00～07:00）はダークになります。',
     loading: 'データを読み込み中...',
     noData: 'データなし',
+    districtNotFound: '{district}が見つかりませんでした。{city}の天気を表示しています。',
+    pressure: '気圧',
+    sunrise: '日の出',
+    sunset: '日の入り',
   },
   de: {
     weather: 'Wetter',
@@ -144,6 +157,10 @@ export const translations = {
     info: 'Im Automatikmodus wird das Systemthema oder die Zeit (19:00-07:00) als Dunkelmodus angewendet.',
     loading: 'Daten werden geladen...',
     noData: 'Keine Daten',
+    districtNotFound: '{district} wurde nicht gefunden, Wetter für {city} wird angezeigt.',
+    pressure: 'Luftdruck',
+    sunrise: 'Sonnenaufgang',
+    sunset: 'Sonnenuntergang',
   },
 };
 
@@ -198,6 +215,49 @@ function turkceKarakterleriDonustur(str: string) {
     .replace(/ç/g, 'c')
     .replace(/Ç/g, 'C');
 }
+
+// İlçe-büyükşehir eşlemesi
+const DISTRICT_TO_CITY: Record<string, string> = {
+  'bayrampasa': 'Istanbul',
+  'kağıthane': 'Istanbul',
+  'kagithane': 'Istanbul',
+  'esenler': 'Istanbul',
+  // Gerekirse diğer ilçeler eklenebilir
+};
+
+// Lottie animasyonlarını hava durumu koduna ve gündüz/geceye göre eşleştiren yardımcı fonksiyon
+const getWeatherLottie = (weatherMain: string, isNight: boolean) => {
+  switch (weatherMain.toLowerCase()) {
+    case 'clear':
+      return isNight
+        ? require('../../assets/lottie/clear-night.json')
+        : require('../../assets/lottie/clear-day.json');
+    case 'clouds':
+      return isNight
+        ? require('../../assets/lottie/partly-cloudy-night.json')
+        : require('../../assets/lottie/partly-cloudy-day.json');
+    case 'rain':
+      return require('../../assets/lottie/rain.json');
+    case 'drizzle':
+      return require('../../assets/lottie/drizzle.json');
+    case 'thunderstorm':
+      return require('../../assets/lottie/thunder.json');
+    case 'snow':
+      return require('../../assets/lottie/snow.json');
+    case 'mist':
+    case 'fog':
+    case 'haze':
+    case 'smoke':
+    case 'dust':
+    case 'sand':
+    case 'ash':
+      return require('../../assets/lottie/mist.json');
+    default:
+      return isNight
+        ? require('../../assets/lottie/partly-cloudy-night.json')
+        : require('../../assets/lottie/partly-cloudy-day.json');
+  }
+};
 
 export default function HomeScreen() {
   const { theme, isDark } = useContext(ThemeContext);
@@ -268,7 +328,6 @@ export default function HomeScreen() {
       setError(t('errorNoCity'));
       return;
     }
-    // Türkçe karakterleri dönüştür
     searchCity = turkceKarakterleriDonustur(searchCity.trim());
     setLoading(true);
     setError('');
@@ -279,9 +338,36 @@ export default function HomeScreen() {
       setForecast(forecastData);
       await addRecentCity(searchCity);
     } catch (err) {
-      setError(t('errorNoWeather'));
-      setWeather(null);
-      setForecast(null);
+      // İlçe API'da yoksa büyükşehire yönlendir
+      const lower = searchCity.toLowerCase();
+      let fallbackCity = null;
+      for (const district in DISTRICT_TO_CITY) {
+        if (lower.includes(district)) {
+          fallbackCity = DISTRICT_TO_CITY[district];
+          break;
+        }
+      }
+      if (fallbackCity) {
+        try {
+          const data = await getWeatherByCity(fallbackCity, lang);
+          setWeather(data);
+          const forecastData = await get5DayForecastByCity(fallbackCity, lang);
+          setForecast(forecastData);
+          setError(
+            t('districtNotFound')
+              .replace('{district}', capitalize(searchCity))
+              .replace('{city}', capitalize(fallbackCity))
+          );
+        } catch {
+          setError(t('errorNoWeather'));
+          setWeather(null);
+          setForecast(null);
+        }
+      } else {
+        setError(t('errorNoWeather'));
+        setWeather(null);
+        setForecast(null);
+      }
     } finally {
       setLoading(false);
     }
@@ -297,7 +383,7 @@ export default function HomeScreen() {
         setLoading(false);
         return;
       }
-      let location = await Location.getCurrentPositionAsync({});
+      let location = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High });
       const data = await getWeatherByLocation(location.coords.latitude, location.coords.longitude, lang);
       setWeather(data);
       const forecastData = await get5DayForecastByLocation(location.coords.latitude, location.coords.longitude, lang);
@@ -438,6 +524,15 @@ export default function HomeScreen() {
     })();
   }, []);
 
+  // Gündüz/gece ayrımı için UTC saatine forecast.city.timezone'u ekleyerek yerel saati hesapla
+  const isForecastNight = (dt: number) => {
+    const utcDate = new Date(dt * 1000);
+    const utcHour = utcDate.getUTCHours();
+    const timezoneOffset = (forecast?.city?.timezone || 0) / 3600;
+    const localHour = (utcHour + timezoneOffset + 24) % 24;
+    return !(localHour >= 9 && localHour < 21);
+  };
+
   return (
     <>
       <LinearGradient
@@ -530,17 +625,26 @@ export default function HomeScreen() {
                 </TouchableOpacity>
               )}
               {loading && <ActivityIndicator size="large" color={isDark ? '#fff' : '#0000ff'} />}
-              {error ? (
+              {error && (
                 <Text style={[styles.error, isDark && styles.darkText]}>{error}</Text>
-              ) : weather && (
+              )}
+              {weather && (
                 <View style={styles.weatherCard}>
                   <Text style={styles.cityName}>{turkceSehirAdi(weather.name)}</Text>
                   <View style={styles.tempRow}>
-                    <View style={[getModernForecastIconStyle(isDark), { marginRight: 20 }]}>
-                      <Image
-                        source={{ uri: `https://openweathermap.org/img/wn/${weather.weather[0].icon}@4x.png` }}
-                        style={iconImageStyle}
-                      />
+                    <View style={[getModernForecastIconStyle(isDark), { marginRight: 20, backgroundColor: 'transparent', shadowColor: 'transparent' }]}> 
+                      {(() => {
+                        const now = Date.now() / 1000;
+                        const isNightNow = now < weather.sys.sunrise || now > weather.sys.sunset;
+                        return (
+                          <LottieView
+                            source={getWeatherLottie(weather.weather[0].main, isNightNow)}
+                            autoPlay
+                            loop
+                            style={{ width: 72, height: 72 }}
+                          />
+                        );
+                      })()}
                     </View>
                     <View>
                       <Text style={styles.temperature}>{Math.round(weather.main.temp)}°C</Text>
@@ -570,6 +674,23 @@ export default function HomeScreen() {
                       <Text style={styles.detailValue}>{(weather.wind.speed * 3.6).toFixed(1)} km/sa</Text>
                     </View>
                   </View>
+                  <View style={styles.detailsRow}>
+                    <View style={styles.detailBox}>
+                      <MaterialCommunityIcons name="gauge" size={20} color="#b3c6f7" />
+                      <Text style={styles.detailLabel}>{t('pressure')}</Text>
+                      <Text style={styles.detailValue}>{weather.main.pressure} hPa</Text>
+                    </View>
+                    <View style={styles.detailBox}>
+                      <MaterialCommunityIcons name="weather-sunset-up" size={20} color="#b3c6f7" />
+                      <Text style={styles.detailLabel}>{t('sunrise')}</Text>
+                      <Text style={styles.detailValue}>{new Date(weather.sys.sunrise * 1000).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}</Text>
+                    </View>
+                    <View style={styles.detailBox}>
+                      <MaterialCommunityIcons name="weather-sunset-down" size={20} color="#b3c6f7" />
+                      <Text style={styles.detailLabel}>{t('sunset')}</Text>
+                      <Text style={styles.detailValue}>{new Date(weather.sys.sunset * 1000).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}</Text>
+                    </View>
+                  </View>
                 </View>
               )}
               {/* 5 günlük tahmin */}
@@ -577,19 +698,24 @@ export default function HomeScreen() {
                 <View style={styles.forecastContainer}>
                   <Text style={[styles.forecastTitle, isDark && styles.darkText]}>{t('forecast5')}</Text>
                   <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                    {getDailyForecast(forecast.list).map(item => (
-                      <View style={styles.modernForecastItem} key={item.dt}>
-                        <Text style={styles.modernForecastDay}>{new Date(item.dt_txt).toLocaleDateString(lang === 'de' ? 'de-DE' : lang === 'ja' ? 'ja-JP' : lang === 'en' ? 'en-US' : 'tr-TR', { weekday: 'short', day: 'numeric', month: 'short' })}</Text>
-                        <View style={getModernForecastIconStyle(isDark)}>
-                          <Image
-                            source={{ uri: `https://openweathermap.org/img/wn/${item.weather[0].icon}@4x.png` }}
-                            style={iconImageStyle}
-                          />
+                    {getDailyForecast(forecast.list).map(item => {
+                      const isNight = isForecastNight(item.dt);
+                      return (
+                        <View style={styles.modernForecastItem} key={item.dt}>
+                          <Text style={styles.modernForecastDay}>{new Date(item.dt_txt).toLocaleDateString(lang === 'de' ? 'de-DE' : lang === 'ja' ? 'ja-JP' : lang === 'en' ? 'en-US' : 'tr-TR', { weekday: 'short', day: 'numeric', month: 'short' })}</Text>
+                          <View style={getModernForecastIconStyle(isDark)}>
+                            <LottieView
+                              source={getWeatherLottie(item.weather[0].main, isNight)}
+                              autoPlay
+                              loop
+                              style={{ width: 56, height: 56 }}
+                            />
+                          </View>
+                          <Text style={styles.modernForecastTemp}>{Math.round(item.main.temp)}°C</Text>
+                          <Text style={styles.modernForecastDesc} numberOfLines={2} ellipsizeMode="tail">{formatDescription(item.weather[0].description)}</Text>
                         </View>
-                        <Text style={styles.modernForecastTemp}>{Math.round(item.main.temp)}°C</Text>
-                        <Text style={styles.modernForecastDesc} numberOfLines={2} ellipsizeMode="tail">{formatDescription(item.weather[0].description)}</Text>
-                      </View>
-                    ))}
+                      );
+                    })}
                   </ScrollView>
                 </View>
               )}
@@ -599,19 +725,41 @@ export default function HomeScreen() {
                   <Text style={[styles.forecastTitle, isDark && styles.darkText]}>{t('forecast3h')}</Text>
                   {forecast.list && forecast.list.length > 0 ? (
                     <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                      {forecast.list.slice(0, 8).map(item => (
-                        <View style={styles.modernForecastItem} key={item.dt + '-hourly'}>
-                          <Text style={styles.modernForecastDay}>{new Date(item.dt_txt).toLocaleTimeString(lang === 'de' ? 'de-DE' : lang === 'ja' ? 'ja-JP' : lang === 'en' ? 'en-US' : 'tr-TR', { hour: '2-digit', minute: '2-digit' })}</Text>
-                          <View style={getModernForecastIconStyle(isDark)}>
-                            <Image
-                              source={{ uri: `https://openweathermap.org/img/wn/${item.weather[0].icon}@4x.png` }}
-                              style={iconImageStyle}
-                            />
+                      {forecast.list.slice(0, 8).map(item => {
+                        const utcDate = new Date(item.dt * 1000);
+                        const utcHour = utcDate.getUTCHours();
+                        const timezoneOffset = (forecast?.city?.timezone || 0) / 3600;
+                        const localHour = (utcHour + timezoneOffset + 24) % 24;
+                        const localDt = item.dt + (forecast?.city?.timezone || 0);
+                        const date = new Date(localDt * 1000);
+                        const today = new Date();
+                        let isNight;
+                        if (
+                          date.getDate() === today.getDate() &&
+                          date.getMonth() === today.getMonth() &&
+                          date.getFullYear() === today.getFullYear() &&
+                          weather?.sys?.sunrise && weather?.sys?.sunset
+                        ) {
+                          isNight = localDt < weather.sys.sunrise || localDt > weather.sys.sunset;
+                        } else {
+                          isNight = !(localHour >= 9 && localHour < 21);
+                        }
+                        return (
+                          <View style={styles.modernForecastItem} key={item.dt + '-hourly'}>
+                            <Text style={styles.modernForecastDay}>{new Date(item.dt_txt).toLocaleTimeString(lang === 'de' ? 'de-DE' : lang === 'ja' ? 'ja-JP' : lang === 'en' ? 'en-US' : 'tr-TR', { hour: '2-digit', minute: '2-digit' })}</Text>
+                            <View style={getModernForecastIconStyle(isDark)}>
+                              <LottieView
+                                source={getWeatherLottie(item.weather[0].main, isNight)}
+                                autoPlay
+                                loop
+                                style={{ width: 56, height: 56 }}
+                              />
+                            </View>
+                            <Text style={styles.modernForecastTemp}>{Math.round(item.main.temp)}°C</Text>
+                            <Text style={styles.modernForecastDesc} numberOfLines={2} ellipsizeMode="tail">{formatDescription(item.weather?.[0]?.description || '')}</Text>
                           </View>
-                          <Text style={styles.modernForecastTemp}>{Math.round(item.main.temp)}°C</Text>
-                          <Text style={styles.modernForecastDesc} numberOfLines={2} ellipsizeMode="tail">{formatDescription(item.weather?.[0]?.description || '')}</Text>
-                        </View>
-                      ))}
+                        );
+                      })}
                     </ScrollView>
                   ) : (
                     <Text style={{ color: isDark ? '#fff' : '#222', textAlign: 'center', marginTop: 12 }}>{forecast ? t('loading') || 'Veri yükleniyor...' : t('noData') || 'Veri yok'}</Text>

@@ -20,6 +20,10 @@ export interface WeatherData {
     speed: number;
   };
   name: string;
+  sys: {
+    sunrise: number;
+    sunset: number;
+  };
 }
 
 export interface ForecastItem {
@@ -46,6 +50,7 @@ export interface ForecastData {
   city: {
     name: string;
     country: string;
+    timezone: number;
   };
 }
 
