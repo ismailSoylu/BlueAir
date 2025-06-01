@@ -19,6 +19,7 @@ Users can view real-time weather updates and 5-day forecasts based on city names
 - 🔍 City search with suggestion system
 - ⭐ Save favorite cities
 - 🧾 3-hour and 5-day forecast support
+- 🎞️ Animated weather icons using Lottie
 - 🔐 Secure API key usage via `.env` file
 
 ---
@@ -29,6 +30,7 @@ Users can view real-time weather updates and 5-day forecasts based on city names
 - TypeScript
 - OpenWeatherMap API
 - AsyncStorage
+- Lottie (for animated weather icons)
 
 ---
 
