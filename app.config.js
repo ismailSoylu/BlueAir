@@ -16,8 +16,8 @@ export default {
     },
     android: {
       adaptiveIcon: {
-        foregroundImage: "./assets/images/adaptive-icon.png",
-        backgroundColor: "#ffffff"
+        foregroundImage: "./assets/images/icon.png", // ✅ doğru ikon
+        backgroundColor: "#000000"                   // ✅ arka plan ile uyumlu
       },
       edgeToEdgeEnabled: true,
       package: "com.ismailjacob.blueAir"
@@ -25,17 +25,16 @@ export default {
     web: {
       bundler: "metro",
       output: "static",
-      favicon: "./assets/images/favicon.png"
+      favicon: "./assets/images/icon.png"
     },
     plugins: [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          image: "./assets/images/splash-icon.png",
-          imageWidth: 200,
+          image: "./assets/images/splash.png",       // ✅ gerçek splash görseli
           resizeMode: "contain",
-          backgroundColor: "#ffffff"
+          backgroundColor: "#000000"                 // ✅ tema uyumu
         }
       ]
     ],
@@ -50,4 +49,4 @@ export default {
       }
     }
   }
-}
+};
