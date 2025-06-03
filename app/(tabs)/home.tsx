@@ -178,21 +178,49 @@ const capitalize = (s: string) => s && s.length > 0 ? s.charAt(0).toUpperCase() 
 // Açıklamadaki tüm kelimelerin baş harfini büyüten yardımcı fonksiyon
 const capitalizeAll = (s: string) => s.replace(/\b\w/g, c => c.toUpperCase());
 
+// Gelişmiş arka plan hava durumu bildirimi task'i
 TaskManager.defineTask(WEATHER_TASK, async () => {
   try {
     let { status } = await Location.getForegroundPermissionsAsync();
     if (status !== 'granted') return BackgroundFetch.BackgroundFetchResult.NoData;
     let location = await Location.getCurrentPositionAsync({});
     const API_KEY = Constants.expoConfig?.extra?.OPEN_WEATHER_API_KEY;
+    // Şu anki hava durumu
     const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${location.coords.latitude}&lon=${location.coords.longitude}&appid=${API_KEY}&units=metric&lang=tr`);
     const data = await response.json();
-    await Notifications.scheduleNotificationAsync({
-      content: {
-        title: `${data.name}: ${Math.round(data.main.temp)}°C, ${data.weather[0].description}`,
-        body: `Rüzgar: ${(data.wind.speed * 3.6).toFixed(1)} km/h`,
-      },
-      trigger: null,
-    });
+    // 5 günlük tahmin
+    const forecastRes = await fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${location.coords.latitude}&lon=${location.coords.longitude}&appid=${API_KEY}&units=metric&lang=tr`);
+    const forecastData = await forecastRes.json();
+    // Saatleri al
+    const now = new Date();
+    const hour = now.getHours();
+    // Sabah bildirimi (08:00-09:00 arası bir kere)
+    if (hour === 8) {
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: `${data.name}: ${Math.round(data.main.temp)}°C, ${data.weather[0].description}`,
+          body: `Rüzgar: ${(data.wind.speed * 3.6).toFixed(1)} km/h`,
+        },
+        trigger: null,
+      });
+    }
+    // Akşam yağmur bildirimi (16:00-18:00 arası, yağmur varsa bir kere)
+    if (hour === 17) {
+      // Akşam saatlerine yakın bir forecast bul
+      const eveningForecast = forecastData.list.find((item: ForecastItem) => {
+        const forecastHour = new Date(item.dt * 1000).getHours();
+        return forecastHour >= 18 && forecastHour <= 22;
+      });
+      if (eveningForecast && eveningForecast.weather[0].main.toLowerCase().includes('rain')) {
+        await Notifications.scheduleNotificationAsync({
+          content: {
+            title: `${data.name}: Akşam yağmur bekleniyor!`,
+            body: `Şemsiyeni unutma! Sıcaklık: ${Math.round(eveningForecast.main.temp)}°C`,
+          },
+          trigger: null,
+        });
+      }
+    }
     return BackgroundFetch.BackgroundFetchResult.NewData;
   } catch (e) {
     return BackgroundFetch.BackgroundFetchResult.Failed;
@@ -511,11 +539,12 @@ export default function HomeScreen() {
     return () => clearInterval(timer);
   }, []);
 
-  // useEffect ile izinleri ve task başlatmayı ekle
+  // useEffect ile izinleri ve task başlatmayı güncelle
   useEffect(() => {
     (async () => {
-      await Notifications.requestPermissionsAsync();
-      await Location.requestForegroundPermissionsAsync();
+      const { status: notifStatus } = await Notifications.requestPermissionsAsync();
+      const { status: locStatus } = await Location.requestForegroundPermissionsAsync();
+      if (notifStatus !== 'granted' || locStatus !== 'granted') return;
       await BackgroundFetch.registerTaskAsync(WEATHER_TASK, {
         minimumInterval: 60 * 60, // 1 saat (Expo'da minimum 15dk)
         stopOnTerminate: false,
