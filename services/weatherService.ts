@@ -54,11 +54,38 @@ export interface ForecastData {
   };
 }
 
+// Türkçe karakterleri İngilizce karakterlere çeviren fonksiyon
+const normalizeTurkishChars = (text: string): string => {
+  return text
+    .toLowerCase()
+    .trim()
+    .replace(/ğ/g, 'g')
+    .replace(/ü/g, 'u')
+    .replace(/ş/g, 's')
+    .replace(/ı/g, 'i')
+    .replace(/ö/g, 'o')
+    .replace(/ç/g, 'c');
+};
+
+// İlçe adını büyükşehir ile birleştiren fonksiyon
+const combineDistrictWithCity = (district: string): string => {
+  const istanbulDistricts = ['kağıthane', 'kadıköy', 'beşiktaş', 'üsküdar', 'bakırköy'];
+  const normalizedDistrict = normalizeTurkishChars(district);
+  
+  if (istanbulDistricts.includes(normalizedDistrict)) {
+    return `${district}, Istanbul`;
+  }
+  
+  return district;
+};
+
 export const getWeatherByCity = async (city: string, lang: string = 'tr'): Promise<WeatherData> => {
+  let normalizedCity = city;
   try {
+    normalizedCity = combineDistrictWithCity(city);
     const response = await axios.get(`${BASE_URL}/weather`, {
       params: {
-        q: city,
+        q: normalizedCity,
         appid: API_KEY,
         units: 'metric',
         lang
@@ -66,6 +93,22 @@ export const getWeatherByCity = async (city: string, lang: string = 'tr'): Promi
     });
     return response.data;
   } catch (error) {
+    // İlçe bulunamazsa büyükşehir için tekrar dene
+    if (city !== normalizedCity) {
+      try {
+        const response = await axios.get(`${BASE_URL}/weather`, {
+          params: {
+            q: city,
+            appid: API_KEY,
+            units: 'metric',
+            lang
+          }
+        });
+        return response.data;
+      } catch (retryError) {
+        throw new Error('Hava durumu bilgisi alınamadı');
+      }
+    }
     throw new Error('Hava durumu bilgisi alınamadı');
   }
 };
@@ -118,4 +161,17 @@ export const get5DayForecastByLocation = async (lat: number, lon: number, lang: 
   } catch (error) {
     throw new Error('Tahmin verisi alınamadı');
   }
+};
+
+// Gündüz/gece ayrımı için yardımcı fonksiyon
+export const isDaytime = (sunrise: number, sunset: number, timezone: number): boolean => {
+  const now = Math.floor(Date.now() / 1000);
+  const localTime = now + timezone;
+  return localTime >= sunrise && localTime < sunset;
+};
+
+// Hava durumu ikonu için yardımcı fonksiyon
+export const getWeatherIcon = (icon: string, isDay: boolean): string => {
+  const baseIcon = icon.replace('n', '').replace('d', '');
+  return `${baseIcon}${isDay ? 'd' : 'n'}`;
 }; 
