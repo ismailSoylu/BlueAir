@@ -33,7 +33,7 @@ export default {
         "expo-splash-screen",
         {
           image: "./assets/images/splash.png",       // ✅ gerçek splash görseli
-          resizeMode: "cover",
+          resizeMode: "contain",
           backgroundColor: "#000000"                 // ✅ tema uyumu
         }
       ]
