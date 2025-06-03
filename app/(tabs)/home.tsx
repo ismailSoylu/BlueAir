@@ -300,6 +300,7 @@ export default function HomeScreen() {
   const [citySuggestions, setCitySuggestions] = useState<string[]>([]);
   const [recentCities, setRecentCities] = useState<string[]>([]);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [currentCityName, setCurrentCityName] = useState('');
 
   // Favori şehirleri yükle
   useEffect(() => {
@@ -562,176 +563,226 @@ export default function HomeScreen() {
     return !(localHour >= 9 && localHour < 21);
   };
 
+  // Şehir değiştiğinde güncelle
+  useEffect(() => {
+    if (weather?.name) {
+      setCurrentCityName(weather.name);
+    }
+  }, [weather]);
+
   return (
-    <>
-      <LinearGradient
-        colors={isDark ? ['#232a36', '#181a20'] : ['#b3c6f7', '#e3f0ff']}
-        style={{ flex: 1 }}
-      >
-        <SafeAreaView style={{ flex: 1 }}>
-          <KeyboardAvoidingView
-            style={{ flex: 1 }}
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 24}
-          >
-            <ScrollView contentContainerStyle={{ paddingBottom: 40, paddingHorizontal: 8 }} showsVerticalScrollIndicator={false}>
-              <StatusBar style={isDark ? 'light' : 'dark'} />
-              <Text style={[styles.title, isDark && styles.darkText]}>{t('weather')}</Text>
-              <Text style={{textAlign: 'center', fontSize: 15, color: isDark ? '#fff' : '#222', marginBottom: 4}}>
-                {currentTime.toLocaleTimeString()}
+    <LinearGradient
+      colors={isDark ? ['#232a36', '#181a20'] : ['#b3c6f7', '#e3f0ff']}
+      style={{ flex: 1 }}
+    >
+      <SafeAreaView style={{ flex: 1 }}>
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 24}
+        >
+          <ScrollView contentContainerStyle={{ paddingBottom: 40, paddingHorizontal: 8 }} showsVerticalScrollIndicator={false}>
+            <StatusBar style={isDark ? 'light' : 'dark'} />
+            <Text style={[styles.title, isDark && styles.darkText]}>{t('weather')}</Text>
+            <Text style={{textAlign: 'center', fontSize: 15, color: isDark ? '#fff' : '#222', marginBottom: 4}}>
+              {currentTime.toLocaleTimeString()}
+            </Text>
+            {/* Favori şehirler kutusu */}
+            {favorites.length > 0 && (
+              <View style={[styles.favBox, isDark && styles.darkFavBox]}>
+                <Text style={[styles.favBoxTitle, isDark && styles.darkText]}>{t('favorites')}</Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.favList}>
+                  {favorites.map((fav, i) => (
+                    <TouchableOpacity key={`fav-${fav}-${i}`} style={styles.favItem} onPress={() => fetchWeatherForFavorite(fav)} onLongPress={() => toggleFavorite(fav)}>
+                      <MaterialCommunityIcons name="star" size={18} color="#FFD700" style={{ marginRight: 4 }} />
+                      <Text style={styles.favText}>{fav}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
+            )}
+            {/* Arama kutusu ve butonlar */}
+            <View style={{ width: '100%', alignItems: 'center', marginBottom: 12, position: 'relative' }}>
+              <TextInput
+                style={[styles.input, isDark && styles.darkInput]}
+                placeholder={t('searchPlaceholder')}
+                placeholderTextColor={isDark ? '#aaa' : '#888'}
+                value={city}
+                onChangeText={onCityInputChange}
+                onFocus={onInputFocus}
+                autoCorrect={false}
+                autoCapitalize="none"
+              />
+              <Text style={{ fontSize: 13, color: isDark ? '#b3c6f7' : '#888', marginTop: 2, marginBottom: 6 }}>
+                {t('searchHelper')}
               </Text>
-              {/* Favori şehirler kutusu */}
-              {favorites.length > 0 && (
-                <View style={[styles.favBox, isDark && styles.darkFavBox]}>
-                  <Text style={[styles.favBoxTitle, isDark && styles.darkText]}>{t('favorites')}</Text>
-                  <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.favList}>
-                    {favorites.map((fav, i) => (
-                      <TouchableOpacity key={`fav-${fav}-${i}`} style={styles.favItem} onPress={() => fetchWeatherForFavorite(fav)} onLongPress={() => toggleFavorite(fav)}>
-                        <MaterialCommunityIcons name="star" size={18} color="#FFD700" style={{ marginRight: 4 }} />
-                        <Text style={styles.favText}>{fav}</Text>
-                      </TouchableOpacity>
-                    ))}
-                  </ScrollView>
-                </View>
+              {citySuggestions.length > 0 && (
+                <ScrollView
+                  keyboardShouldPersistTaps="handled"
+                  style={{
+                    position: 'absolute',
+                    top: 62, // inputun hemen altı için ayarlandı
+                    left: 0,
+                    right: 0,
+                    width: '100%',
+                    backgroundColor: isDark ? '#232a36' : '#fff',
+                    borderRadius: 12,
+                    borderWidth: 1,
+                    borderColor: '#e0e7ff',
+                    shadowColor: '#000',
+                    shadowOpacity: 0.08,
+                    shadowRadius: 4,
+                    zIndex: 100,
+                    maxHeight: 220,
+                  }}
+                >
+                  {citySuggestions.map((s, i) => (
+                    <TouchableOpacity key={`suggestion-${s}-${i}`} onPress={() => onSuggestionPress(s)} style={{ padding: 12, borderBottomWidth: 1, borderBottomColor: isDark ? '#333' : '#eee' }}>
+                      <Text style={{ color: isDark ? '#fff' : '#222', fontSize: 16 }}>{s}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
               )}
-              {/* Arama kutusu ve butonlar */}
-              <View style={{ width: '100%', alignItems: 'center', marginBottom: 12, position: 'relative' }}>
-                <TextInput
-                  style={[styles.input, isDark && styles.darkInput]}
-                  placeholder={t('searchPlaceholder')}
-                  placeholderTextColor={isDark ? '#aaa' : '#888'}
-                  value={city}
-                  onChangeText={onCityInputChange}
-                  onFocus={onInputFocus}
-                  autoCorrect={false}
-                  autoCapitalize="none"
-                />
-                <Text style={{ fontSize: 13, color: isDark ? '#b3c6f7' : '#888', marginTop: 2, marginBottom: 6 }}>
-                  {t('searchHelper')}
-                </Text>
-                {citySuggestions.length > 0 && (
-                  <ScrollView
-                    keyboardShouldPersistTaps="handled"
-                    style={{
-                      position: 'absolute',
-                      top: 62, // inputun hemen altı için ayarlandı
-                      left: 0,
-                      right: 0,
-                      width: '100%',
-                      backgroundColor: isDark ? '#232a36' : '#fff',
-                      borderRadius: 12,
-                      borderWidth: 1,
-                      borderColor: '#e0e7ff',
-                      shadowColor: '#000',
-                      shadowOpacity: 0.08,
-                      shadowRadius: 4,
-                      zIndex: 100,
-                      maxHeight: 220,
-                    }}
-                  >
-                    {citySuggestions.map((s, i) => (
-                      <TouchableOpacity key={`suggestion-${s}-${i}`} onPress={() => onSuggestionPress(s)} style={{ padding: 12, borderBottomWidth: 1, borderBottomColor: isDark ? '#333' : '#eee' }}>
-                        <Text style={{ color: isDark ? '#fff' : '#222', fontSize: 16 }}>{s}</Text>
-                      </TouchableOpacity>
-                    ))}
-                  </ScrollView>
-                )}
-                <View style={styles.buttonRow}>
-                  <TouchableOpacity style={[styles.button, {flex: 1, marginRight: 6, minWidth: 0}]} onPress={() => fetchWeather()}>
-                    <MaterialCommunityIcons name="magnify" size={22} color="#fff" />
-                    <Text style={styles.buttonText} numberOfLines={1} ellipsizeMode="tail">{t('search')}</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity style={[styles.locationButton, {flex: 1, marginLeft: 6, minWidth: 0}]} onPress={fetchWeatherByLocation}>
-                    <MaterialCommunityIcons name="map-marker" size={22} color="#fff" />
-                    <Text style={styles.buttonText} numberOfLines={1} ellipsizeMode="tail">{t('findByLocation')}</Text>
-                  </TouchableOpacity>
+              <View style={styles.buttonRow}>
+                <TouchableOpacity style={[styles.button, {flex: 1, marginRight: 6, minWidth: 0}]} onPress={() => fetchWeather()}>
+                  <MaterialCommunityIcons name="magnify" size={22} color="#fff" />
+                  <Text style={styles.buttonText} numberOfLines={1} ellipsizeMode="tail">{t('search')}</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={[styles.locationButton, {flex: 1, marginLeft: 6, minWidth: 0}]} onPress={fetchWeatherByLocation}>
+                  <MaterialCommunityIcons name="map-marker" size={22} color="#fff" />
+                  <Text style={styles.buttonText} numberOfLines={1} ellipsizeMode="tail">{t('findByLocation')}</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+            {/* Ana hava durumu kartı */}
+            {weather && (
+              <TouchableOpacity style={styles.favButton} onPress={() => toggleFavorite(turkceSehirAdi(weather.name))}>
+                <MaterialCommunityIcons name="star" size={28} color={favorites.includes(turkceSehirAdi(weather.name)) ? '#FFD700' : '#bbb'} />
+              </TouchableOpacity>
+            )}
+            {loading && <ActivityIndicator size="large" color={isDark ? '#fff' : '#0000ff'} />}
+            {error && (
+              <Text style={[styles.error, isDark && styles.darkText]}>{error}</Text>
+            )}
+            {weather && (
+              <View style={styles.weatherCard}>
+                <Text style={styles.cityName}>{turkceSehirAdi(weather.name)}</Text>
+                <View style={styles.tempRow}>
+                  <View style={[getModernForecastIconStyle(isDark), { marginRight: 20, backgroundColor: 'transparent', shadowColor: 'transparent' }]}> 
+                    {(() => {
+                      const now = Date.now() / 1000;
+                      const isNightNow = now < weather.sys.sunrise || now > weather.sys.sunset;
+                      return (
+                        <LottieView
+                          source={getWeatherLottie(weather.weather[0].main, isNightNow)}
+                          autoPlay
+                          loop
+                          style={{ width: 72, height: 72 }}
+                        />
+                      );
+                    })()}
+                  </View>
+                  <View>
+                    <Text style={styles.temperature}>{Math.round(weather.main.temp)}°C</Text>
+                    <Text
+                      style={[styles.description, { maxWidth: 120, flexShrink: 1 }]}
+                      numberOfLines={2}
+                      ellipsizeMode="tail"
+                    >
+                      {formatDescription(weather.weather[0].description)}
+                    </Text>
+                  </View>
+                </View>
+                <View style={styles.detailsRow}>
+                  <View style={styles.detailBox}>
+                    <MaterialCommunityIcons name="thermometer" size={20} color="#b3c6f7" />
+                    <Text style={styles.detailLabel}>{t('feelsLike')}</Text>
+                    <Text style={styles.detailValue}>{Math.round(weather.main.feels_like)}°C</Text>
+                  </View>
+                  <View style={styles.detailBox}>
+                    <MaterialCommunityIcons name="water-percent" size={20} color="#b3c6f7" />
+                    <Text style={styles.detailLabel}>{t('humidity')}</Text>
+                    <Text style={styles.detailValue}>%{weather.main.humidity}</Text>
+                  </View>
+                  <View style={styles.detailBox}>
+                    <MaterialCommunityIcons name="weather-windy" size={20} color="#b3c6f7" />
+                    <Text style={styles.detailLabel}>{t('wind')}</Text>
+                    <Text style={styles.detailValue}>{(weather.wind.speed * 3.6).toFixed(1)} km/sa</Text>
+                  </View>
+                </View>
+                <View style={styles.detailsRow}>
+                  <View style={styles.detailBox}>
+                    <MaterialCommunityIcons name="gauge" size={20} color="#b3c6f7" />
+                    <Text style={styles.detailLabel}>{t('pressure')}</Text>
+                    <Text style={styles.detailValue}>{weather.main.pressure} hPa</Text>
+                  </View>
+                  <View style={styles.detailBox}>
+                    <MaterialCommunityIcons name="weather-sunset-up" size={20} color="#b3c6f7" />
+                    <Text style={styles.detailLabel}>{t('sunrise')}</Text>
+                    <Text style={styles.detailValue}>{new Date(weather.sys.sunrise * 1000).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}</Text>
+                  </View>
+                  <View style={styles.detailBox}>
+                    <MaterialCommunityIcons name="weather-sunset-down" size={20} color="#b3c6f7" />
+                    <Text style={styles.detailLabel}>{t('sunset')}</Text>
+                    <Text style={styles.detailValue}>{new Date(weather.sys.sunset * 1000).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}</Text>
+                  </View>
                 </View>
               </View>
-              {/* Ana hava durumu kartı */}
-              {weather && (
-                <TouchableOpacity style={styles.favButton} onPress={() => toggleFavorite(turkceSehirAdi(weather.name))}>
-                  <MaterialCommunityIcons name="star" size={28} color={favorites.includes(turkceSehirAdi(weather.name)) ? '#FFD700' : '#bbb'} />
-                </TouchableOpacity>
-              )}
-              {loading && <ActivityIndicator size="large" color={isDark ? '#fff' : '#0000ff'} />}
-              {error && (
-                <Text style={[styles.error, isDark && styles.darkText]}>{error}</Text>
-              )}
-              {weather && (
-                <View style={styles.weatherCard}>
-                  <Text style={styles.cityName}>{turkceSehirAdi(weather.name)}</Text>
-                  <View style={styles.tempRow}>
-                    <View style={[getModernForecastIconStyle(isDark), { marginRight: 20, backgroundColor: 'transparent', shadowColor: 'transparent' }]}> 
-                      {(() => {
-                        const now = Date.now() / 1000;
-                        const isNightNow = now < weather.sys.sunrise || now > weather.sys.sunset;
-                        return (
+            )}
+            {/* 5 günlük tahmin */}
+            {forecast && (
+              <View style={styles.forecastContainer}>
+                <Text style={[styles.forecastTitle, isDark && styles.darkText]}>{t('forecast5')}</Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                  {getDailyForecast(forecast.list).map(item => {
+                    const isNight = isForecastNight(item.dt);
+                    return (
+                      <View style={styles.modernForecastItem} key={item.dt}>
+                        <Text style={styles.modernForecastDay}>{new Date(item.dt_txt).toLocaleDateString(lang === 'de' ? 'de-DE' : lang === 'ja' ? 'ja-JP' : lang === 'en' ? 'en-US' : 'tr-TR', { weekday: 'short', day: 'numeric', month: 'short' })}</Text>
+                        <View style={getModernForecastIconStyle(isDark)}>
                           <LottieView
-                            source={getWeatherLottie(weather.weather[0].main, isNightNow)}
+                            source={getWeatherLottie(item.weather[0].main, isNight)}
                             autoPlay
                             loop
-                            style={{ width: 72, height: 72 }}
+                            style={{ width: 56, height: 56 }}
                           />
-                        );
-                      })()}
-                    </View>
-                    <View>
-                      <Text style={styles.temperature}>{Math.round(weather.main.temp)}°C</Text>
-                      <Text
-                        style={[styles.description, { maxWidth: 120, flexShrink: 1 }]}
-                        numberOfLines={2}
-                        ellipsizeMode="tail"
-                      >
-                        {formatDescription(weather.weather[0].description)}
-                      </Text>
-                    </View>
-                  </View>
-                  <View style={styles.detailsRow}>
-                    <View style={styles.detailBox}>
-                      <MaterialCommunityIcons name="thermometer" size={20} color="#b3c6f7" />
-                      <Text style={styles.detailLabel}>{t('feelsLike')}</Text>
-                      <Text style={styles.detailValue}>{Math.round(weather.main.feels_like)}°C</Text>
-                    </View>
-                    <View style={styles.detailBox}>
-                      <MaterialCommunityIcons name="water-percent" size={20} color="#b3c6f7" />
-                      <Text style={styles.detailLabel}>{t('humidity')}</Text>
-                      <Text style={styles.detailValue}>%{weather.main.humidity}</Text>
-                    </View>
-                    <View style={styles.detailBox}>
-                      <MaterialCommunityIcons name="weather-windy" size={20} color="#b3c6f7" />
-                      <Text style={styles.detailLabel}>{t('wind')}</Text>
-                      <Text style={styles.detailValue}>{(weather.wind.speed * 3.6).toFixed(1)} km/sa</Text>
-                    </View>
-                  </View>
-                  <View style={styles.detailsRow}>
-                    <View style={styles.detailBox}>
-                      <MaterialCommunityIcons name="gauge" size={20} color="#b3c6f7" />
-                      <Text style={styles.detailLabel}>{t('pressure')}</Text>
-                      <Text style={styles.detailValue}>{weather.main.pressure} hPa</Text>
-                    </View>
-                    <View style={styles.detailBox}>
-                      <MaterialCommunityIcons name="weather-sunset-up" size={20} color="#b3c6f7" />
-                      <Text style={styles.detailLabel}>{t('sunrise')}</Text>
-                      <Text style={styles.detailValue}>{new Date(weather.sys.sunrise * 1000).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}</Text>
-                    </View>
-                    <View style={styles.detailBox}>
-                      <MaterialCommunityIcons name="weather-sunset-down" size={20} color="#b3c6f7" />
-                      <Text style={styles.detailLabel}>{t('sunset')}</Text>
-                      <Text style={styles.detailValue}>{new Date(weather.sys.sunset * 1000).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}</Text>
-                    </View>
-                  </View>
-                </View>
-              )}
-              {/* 5 günlük tahmin */}
-              {forecast && (
-                <View style={styles.forecastContainer}>
-                  <Text style={[styles.forecastTitle, isDark && styles.darkText]}>{t('forecast5')}</Text>
+                        </View>
+                        <Text style={styles.modernForecastTemp}>{Math.round(item.main.temp)}°C</Text>
+                        <Text style={styles.modernForecastDesc} numberOfLines={2} ellipsizeMode="tail">{formatDescription(item.weather[0].description)}</Text>
+                      </View>
+                    );
+                  })}
+                </ScrollView>
+              </View>
+            )}
+            {/* 3 saatlik tahmin */}
+            {forecast && (
+              <View style={[styles.hourlyCard, isDark && styles.darkHourlyCard, { width: '100%', alignSelf: 'center', marginTop: 12 }]}> 
+                <Text style={[styles.forecastTitle, isDark && styles.darkText]}>{t('forecast3h')}</Text>
+                {forecast.list && forecast.list.length > 0 ? (
                   <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                    {getDailyForecast(forecast.list).map(item => {
-                      const isNight = isForecastNight(item.dt);
+                    {forecast.list.slice(0, 8).map(item => {
+                      const utcDate = new Date(item.dt * 1000);
+                      const utcHour = utcDate.getUTCHours();
+                      const timezoneOffset = (forecast?.city?.timezone || 0) / 3600;
+                      const localHour = (utcHour + timezoneOffset + 24) % 24;
+                      const localDt = item.dt + (forecast?.city?.timezone || 0);
+                      const date = new Date(localDt * 1000);
+                      const today = new Date();
+                      let isNight;
+                      if (
+                        date.getDate() === today.getDate() &&
+                        date.getMonth() === today.getMonth() &&
+                        date.getFullYear() === today.getFullYear() &&
+                        weather?.sys?.sunrise && weather?.sys?.sunset
+                      ) {
+                        isNight = localDt < weather.sys.sunrise || localDt > weather.sys.sunset;
+                      } else {
+                        isNight = !(localHour >= 9 && localHour < 21);
+                      }
                       return (
-                        <View style={styles.modernForecastItem} key={item.dt}>
-                          <Text style={styles.modernForecastDay}>{new Date(item.dt_txt).toLocaleDateString(lang === 'de' ? 'de-DE' : lang === 'ja' ? 'ja-JP' : lang === 'en' ? 'en-US' : 'tr-TR', { weekday: 'short', day: 'numeric', month: 'short' })}</Text>
+                        <View style={styles.modernForecastItem} key={item.dt + '-hourly'}>
+                          <Text style={styles.modernForecastDay}>{new Date(item.dt_txt).toLocaleTimeString(lang === 'de' ? 'de-DE' : lang === 'ja' ? 'ja-JP' : lang === 'en' ? 'en-US' : 'tr-TR', { hour: '2-digit', minute: '2-digit' })}</Text>
                           <View style={getModernForecastIconStyle(isDark)}>
                             <LottieView
                               source={getWeatherLottie(item.weather[0].main, isNight)}
@@ -741,65 +792,20 @@ export default function HomeScreen() {
                             />
                           </View>
                           <Text style={styles.modernForecastTemp}>{Math.round(item.main.temp)}°C</Text>
-                          <Text style={styles.modernForecastDesc} numberOfLines={2} ellipsizeMode="tail">{formatDescription(item.weather[0].description)}</Text>
+                          <Text style={styles.modernForecastDesc} numberOfLines={2} ellipsizeMode="tail">{formatDescription(item.weather?.[0]?.description || '')}</Text>
                         </View>
                       );
                     })}
                   </ScrollView>
-                </View>
-              )}
-              {/* 3 saatlik tahmin */}
-              {forecast && (
-                <View style={[styles.hourlyCard, isDark && styles.darkHourlyCard, { width: '100%', alignSelf: 'center', marginTop: 12 }]}> 
-                  <Text style={[styles.forecastTitle, isDark && styles.darkText]}>{t('forecast3h')}</Text>
-                  {forecast.list && forecast.list.length > 0 ? (
-                    <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                      {forecast.list.slice(0, 8).map(item => {
-                        const utcDate = new Date(item.dt * 1000);
-                        const utcHour = utcDate.getUTCHours();
-                        const timezoneOffset = (forecast?.city?.timezone || 0) / 3600;
-                        const localHour = (utcHour + timezoneOffset + 24) % 24;
-                        const localDt = item.dt + (forecast?.city?.timezone || 0);
-                        const date = new Date(localDt * 1000);
-                        const today = new Date();
-                        let isNight;
-                        if (
-                          date.getDate() === today.getDate() &&
-                          date.getMonth() === today.getMonth() &&
-                          date.getFullYear() === today.getFullYear() &&
-                          weather?.sys?.sunrise && weather?.sys?.sunset
-                        ) {
-                          isNight = localDt < weather.sys.sunrise || localDt > weather.sys.sunset;
-                        } else {
-                          isNight = !(localHour >= 9 && localHour < 21);
-                        }
-                        return (
-                          <View style={styles.modernForecastItem} key={item.dt + '-hourly'}>
-                            <Text style={styles.modernForecastDay}>{new Date(item.dt_txt).toLocaleTimeString(lang === 'de' ? 'de-DE' : lang === 'ja' ? 'ja-JP' : lang === 'en' ? 'en-US' : 'tr-TR', { hour: '2-digit', minute: '2-digit' })}</Text>
-                            <View style={getModernForecastIconStyle(isDark)}>
-                              <LottieView
-                                source={getWeatherLottie(item.weather[0].main, isNight)}
-                                autoPlay
-                                loop
-                                style={{ width: 56, height: 56 }}
-                              />
-                            </View>
-                            <Text style={styles.modernForecastTemp}>{Math.round(item.main.temp)}°C</Text>
-                            <Text style={styles.modernForecastDesc} numberOfLines={2} ellipsizeMode="tail">{formatDescription(item.weather?.[0]?.description || '')}</Text>
-                          </View>
-                        );
-                      })}
-                    </ScrollView>
-                  ) : (
-                    <Text style={{ color: isDark ? '#fff' : '#222', textAlign: 'center', marginTop: 12 }}>{forecast ? t('loading') || 'Veri yükleniyor...' : t('noData') || 'Veri yok'}</Text>
-                  )}
-                </View>
-              )}
-            </ScrollView>
-          </KeyboardAvoidingView>
-        </SafeAreaView>
-      </LinearGradient>
-    </>
+                ) : (
+                  <Text style={{ color: isDark ? '#fff' : '#222', textAlign: 'center', marginTop: 12 }}>{forecast ? t('loading') || 'Veri yükleniyor...' : t('noData') || 'Veri yok'}</Text>
+                )}
+              </View>
+            )}
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </LinearGradient>
   );
 }
 
@@ -1077,4 +1083,3 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
 });
-
