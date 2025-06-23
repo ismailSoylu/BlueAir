@@ -16,7 +16,7 @@ export default {
     },
     android: {
       adaptiveIcon: {
-        foregroundImage: "./assets/images/icon.png", // ✅ doğru ikon
+        foregroundImage: "./assets/images/adaptive-icon.png", // ✅ doğru ikon
         backgroundColor: "#000000"                   // ✅ arka plan ile uyumlu
       },
       edgeToEdgeEnabled: true,
