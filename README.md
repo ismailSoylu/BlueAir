@@ -34,6 +34,22 @@ Users can view real-time weather updates and 5-day forecasts based on city names
 
 ---
 
+## 🔐 Environment Variables
+
+Before running the project, you need to set up your environment variables.
+
+1. Create a `.env` file in the root directory using the provided template:
+
+   ```bash
+   cp .env.example .env
+
+2. Open the .env file and replace the placeholder with your actual OpenWeatherMap API key:
+
+   ```bash
+   WEATHER_API_KEY=your_openweathermap_api_key_here
+
+⚠️ Important: Do NOT commit the .env file to your repository, as it contains sensitive information.
+
 ## ⚙️ Installation
 
 ```bash
