@@ -34,7 +34,7 @@ export default {
         {
           image: "./assets/images/splash.png",       // ✅ gerçek splash görseli
           resizeMode: "contain",
-          backgroundColor: "#000000"                 // ✅ tema uyumu
+          backgroundColor: "#1B2A40"                 // ✅ tema uyumu
         }
       ]
     ],
