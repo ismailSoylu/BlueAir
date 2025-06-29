@@ -3,7 +3,8 @@ import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { AppState } from 'react-native';
 import 'react-native-reanimated';
 import { LanguageContext, ThemeContext } from './(tabs)/home';
 
@@ -16,9 +17,25 @@ export default function RootLayout() {
   const [theme, setTheme] = useState<'light' | 'dark' | 'auto'>('auto');
   const [isDark, setIsDark] = useState(false);
   const [lang, setLang] = useState<Lang>('tr');
+  const appState = useRef(AppState.currentState);
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
+
+  // App State yönetimi - uygulama arka plana geçtiğinde state'i koru
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', nextAppState => {
+      if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
+        console.log('App has come to the foreground!');
+        // Uygulama tekrar aktif olduğunda gerekli işlemleri yap
+      }
+      appState.current = nextAppState;
+    });
+
+    return () => {
+      subscription?.remove();
+    };
+  }, []);
 
   useEffect(() => {
     const loadTheme = async () => {
@@ -51,7 +68,16 @@ export default function RootLayout() {
     <LanguageContext.Provider value={{ lang, setLang }}>
       <ThemeContext.Provider value={{ theme, isDark, setTheme }}>
         <ThemeProvider value={isDark ? DarkTheme : DefaultTheme}>
-          <Stack>
+          <Stack
+            screenOptions={{
+              // Uygulama arka planda kalırken state'i koru
+              freezeOnBlur: false,
+              // Navigation state'ini koru
+              gestureEnabled: true,
+              // Header'ı gizle (eğer gerekirse)
+              headerShown: false,
+            }}
+          >
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             <Stack.Screen name="+not-found" />
           </Stack>

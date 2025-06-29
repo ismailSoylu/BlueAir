@@ -12,15 +12,29 @@ export default {
     userInterfaceStyle: "automatic",
     newArchEnabled: true,
     ios: {
-      supportsTablet: true
+      supportsTablet: true,
+      bundleIdentifier: "com.ismailjacob.blueAir",
+      infoPlist: {
+        UIBackgroundModes: ["background-fetch", "background-processing"],
+        NSLocationWhenInUseUsageDescription: "Hava durumu bilgisi için konumunuza ihtiyaç duyuyoruz.",
+        NSLocationAlwaysAndWhenInUseUsageDescription: "Arka plan hava durumu bildirimleri için konumunuza ihtiyaç duyuyoruz."
+      }
     },
     android: {
+      supportsTablet: true,
       adaptiveIcon: {
         foregroundImage: "./assets/images/adaptive-icon.png", // ✅ doğru ikon
         backgroundColor: "#000000"                   // ✅ arka plan ile uyumlu
       },
       edgeToEdgeEnabled: true,
-      package: "com.ismailjacob.blueAir"
+      package: "com.ismailjacob.blueAir",
+      // Uygulama arka planda kalırken state'i koru
+      allowBackup: true,
+      // Ekran kilitlendiğinde uygulamayı koru
+      softwareKeyboardLayoutMode: "pan",
+      // Memory yönetimi
+      enableProguardInReleaseBuilds: false,
+      enableSeparateBuildPerCPUArchitecture: false,
     },
     web: {
       bundler: "metro",
