@@ -20,6 +20,7 @@
     "dotenv": "^16.5.0",
     "expo": "~53.0.9",
     "expo-background-fetch": "~13.1.5",
+    "expo-background-task": "^0.2.7",
     "expo-blur": "~14.1.4",
     "expo-constants": "~17.1.6",
     "expo-font": "~13.3.1",

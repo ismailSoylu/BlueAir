@@ -546,8 +546,8 @@ export default function HomeScreen() {
       const { status: notifStatus } = await Notifications.requestPermissionsAsync();
       const { status: locStatus } = await Location.requestForegroundPermissionsAsync();
       if (notifStatus !== 'granted' || locStatus !== 'granted') return;
-      
-      // Background fetch task'ını kaydet
+
+      // Background fetch task'ı kaydet
       await BackgroundFetch.registerTaskAsync(WEATHER_TASK, {
         minimumInterval: 60 * 60, // 1 saat (Expo'da minimum 15dk)
         stopOnTerminate: false,
@@ -558,9 +558,8 @@ export default function HomeScreen() {
       if (Platform.OS === 'android') {
         try {
           // Wake lock al (uygulamanın uykuya geçmesini engeller)
-          const { activateKeepAwake, deactivateKeepAwake } = await import('expo-keep-awake');
-          activateKeepAwake();
-          
+          const { activateKeepAwakeAsync, deactivateKeepAwake } = await import('expo-keep-awake');
+          await activateKeepAwakeAsync();
           // Component unmount olduğunda wake lock'ı kaldır
           return () => {
             deactivateKeepAwake();
