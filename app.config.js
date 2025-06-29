@@ -35,6 +35,19 @@ export default {
       // Memory yönetimi
       enableProguardInReleaseBuilds: false,
       enableSeparateBuildPerCPUArchitecture: false,
+      // Task killer önleme
+      permissions: [
+        "android.permission.WAKE_LOCK",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"
+      ],
+      // Arka plan servisleri
+      services: [
+        {
+          name: "com.ismailjacob.blueAir.WeatherService",
+          description: "Hava durumu güncelleme servisi"
+        }
+      ]
     },
     web: {
       bundler: "metro",

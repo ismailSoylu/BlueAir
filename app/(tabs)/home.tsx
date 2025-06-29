@@ -546,11 +546,29 @@ export default function HomeScreen() {
       const { status: notifStatus } = await Notifications.requestPermissionsAsync();
       const { status: locStatus } = await Location.requestForegroundPermissionsAsync();
       if (notifStatus !== 'granted' || locStatus !== 'granted') return;
+      
+      // Background fetch task'ını kaydet
       await BackgroundFetch.registerTaskAsync(WEATHER_TASK, {
         minimumInterval: 60 * 60, // 1 saat (Expo'da minimum 15dk)
         stopOnTerminate: false,
         startOnBoot: true,
       });
+
+      // Battery optimization bypass (Android için)
+      if (Platform.OS === 'android') {
+        try {
+          // Wake lock al (uygulamanın uykuya geçmesini engeller)
+          const { activateKeepAwake, deactivateKeepAwake } = await import('expo-keep-awake');
+          activateKeepAwake();
+          
+          // Component unmount olduğunda wake lock'ı kaldır
+          return () => {
+            deactivateKeepAwake();
+          };
+        } catch (error) {
+          console.log('Keep awake not available:', error);
+        }
+      }
     })();
   }, []);
 
