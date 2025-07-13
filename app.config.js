@@ -5,7 +5,7 @@ export default {
     name: "Blue Air",
     displayName: "Blue Air",
     slug: "blueAir",
-    version: "1.0.0",
+    version: "1.0.1",
     orientation: "portrait",
     icon: "./assets/images/icon.png",
     scheme: "blueair",
@@ -28,6 +28,7 @@ export default {
       },
       edgeToEdgeEnabled: true,
       package: "com.ismailjacob.blueAir",
+      versionCode: 6, // Play Store için sürüm kodunu artırdık
       // Uygulama arka planda kalırken state'i koru
       allowBackup: true,
       // Ekran kilitlendiğinde uygulamayı koru
