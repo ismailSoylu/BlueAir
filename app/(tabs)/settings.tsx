@@ -8,8 +8,7 @@ import { LanguageContext, ThemeContext } from './home';
 
 const THEME_KEY = 'APP_THEME';
 
-// Play Store linki (şimdilik placeholder, Play Store'a yüklenince güncellenecek)
-const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=com.seninpaketadın';
+const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=com.ismailjacob.blueAir';
 
 // translations tipini genişlet
 export const translations: Record<string, Record<string, string>> = {
