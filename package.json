@@ -29,7 +29,7 @@
     "expo-keep-awake": "^14.1.4",
     "expo-linear-gradient": "^14.1.4",
     "expo-linking": "~7.1.5",
-    "expo-location": "~18.1.5",
+    "expo-location": "~18.1.6",
     "expo-notifications": "~0.31.2",
     "expo-router": "~5.1.0",
     "expo-splash-screen": "~0.30.8",

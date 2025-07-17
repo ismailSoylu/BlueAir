@@ -11,6 +11,7 @@ import LottieView from 'lottie-react-native';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { ActivityIndicator, Keyboard, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, ViewStyle } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useCurrentLocation } from '../../hooks/useCurrentLocation';
 import { ForecastData, ForecastItem, get5DayForecastByCity, get5DayForecastByLocation, getWeatherByCity, getWeatherByLocation, WeatherData } from '../../services/weatherService';
 
 const THEME_KEY = 'APP_THEME';
@@ -301,6 +302,7 @@ export default function HomeScreen() {
   const [recentCities, setRecentCities] = useState<string[]>([]);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [currentCityName, setCurrentCityName] = useState('');
+  const { location, errorMsg: locationError } = useCurrentLocation();
 
   // Favori şehirleri yükle
   useEffect(() => {
@@ -586,6 +588,32 @@ export default function HomeScreen() {
       setCurrentCityName(weather.name);
     }
   }, [weather]);
+
+  useEffect(() => {
+    // Eğer kullanıcı şehir aramadıysa ve konum mevcutsa, konuma göre hava durumu getir
+    if (!city && location) {
+      setLoading(true);
+      setError('');
+      getWeatherByLocation(location.latitude, location.longitude, lang)
+        .then(data => {
+          setWeather(data);
+        })
+        .catch(() => {
+          setError(t('errorNoLocation'));
+          setWeather(null);
+        })
+        .finally(() => setLoading(false));
+    }
+  }, [location, city, lang]);
+
+  // Hata mesajı olarak konum hatasını da göster
+  if (!city && locationError) {
+    return <Text>{locationError}</Text>;
+  }
+  if (!city && !location) {
+    // Konum alınana kadar bekleme mesajı
+    return <ActivityIndicator />;
+  }
 
   return (
     <LinearGradient

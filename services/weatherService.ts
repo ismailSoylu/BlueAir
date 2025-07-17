@@ -130,6 +130,14 @@ export const getWeatherByLocation = async (lat: number, lon: number, lang: strin
   }
 };
 
+export async function getWeatherByCoords(lat: number, lon: number) {
+  const apiKey = process.env.OPEN_WEATHER_API_KEY;
+  const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&lang=tr&appid=${apiKey}`;
+  const response = await fetch(url);
+  if (!response.ok) throw new Error('Hava durumu alınamadı');
+  return response.json();
+}
+
 export const get5DayForecastByCity = async (city: string, lang: string = 'tr'): Promise<ForecastData> => {
   try {
     const response = await axios.get(`${BASE_URL}/forecast`, {
