@@ -43,7 +43,7 @@ export const translations: Record<string, Record<string, string>> = {
     pressure: 'Basınç',
     sunrise: 'G. Doğumu',
     sunset: 'G. Batımı',
-    rateUs: 'Bizi desteklemek ister misiniz? Uygulamamızı beğendiyseniz 5 yıldız verebilirsiniz! (Buton Play Storea yüklendikten sonra aktif olacaktır.)',
+    rateUs: 'Bizi desteklemek ister misiniz? Uygulamamızı beğendiyseniz 5 yıldız verebilirsiniz!',
     rateButton: '5 Yıldız Ver',
   },
   en: {
