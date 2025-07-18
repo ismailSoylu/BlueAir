@@ -11,6 +11,7 @@ export default {
     scheme: "blueair",
     userInterfaceStyle: "automatic",
     newArchEnabled: true,
+
     ios: {
       supportsTablet: true,
       bundleIdentifier: "com.ismailjacob.blueAir",
@@ -20,29 +21,41 @@ export default {
         NSLocationAlwaysAndWhenInUseUsageDescription: "Arka plan hava durumu bildirimleri için konumunuza ihtiyaç duyuyoruz."
       }
     },
+
     android: {
       supportsTablet: true,
       adaptiveIcon: {
-        foregroundImage: "./assets/images/adaptive-icon.png", // ✅ doğru ikon
-        backgroundColor: "#000000"                   // ✅ arka plan ile uyumlu
+        foregroundImage: "./assets/images/adaptive-icon.png",
+        backgroundColor: "#000000"
       },
-      edgeToEdgeEnabled: true,
+
+      // ✅ Edge-to-Edge uyumluluk
+      edgeToEdgeEnabled: true, // API 35 için zorunlu
+      statusBar: {
+        translucent: true,
+        backgroundColor: "transparent", // Tam şeffaf status bar
+        barStyle: "light-content"
+      },
+      navigationBar: {
+        visible: true,
+        backgroundColor: "#000000",
+        barStyle: "light"
+      },
+
       package: "com.ismailjacob.blueAir",
-      versionCode: 9, // Play Store için sürüm kodunu artırdık
-      // Uygulama arka planda kalırken state'i koru
+      versionCode: 9,
+
       allowBackup: true,
-      // Ekran kilitlendiğinde uygulamayı koru
       softwareKeyboardLayoutMode: "pan",
-      // Memory yönetimi
       enableProguardInReleaseBuilds: false,
       enableSeparateBuildPerCPUArchitecture: false,
-      // Task killer önleme
+
       permissions: [
         "android.permission.WAKE_LOCK",
         "android.permission.FOREGROUND_SERVICE",
         "android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"
       ],
-      // Arka plan servisleri
+
       services: [
         {
           name: "com.ismailjacob.blueAir.WeatherService",
@@ -50,25 +63,29 @@ export default {
         }
       ]
     },
+
     web: {
       bundler: "metro",
       output: "static",
       favicon: "./assets/images/icon.png"
     },
+
     plugins: [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          image: "./assets/images/splash.png",       // ✅ gerçek splash görseli
+          image: "./assets/images/splash.png",
           resizeMode: "contain",
-          backgroundColor: "#1B2A40"                 // ✅ tema uyumu
+          backgroundColor: "#1B2A40"
         }
       ]
     ],
+
     experiments: {
       typedRoutes: true
     },
+
     extra: {
       openWeatherApiKey: process.env.OPEN_WEATHER_API_KEY,
       router: {},

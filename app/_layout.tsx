@@ -1,14 +1,15 @@
+import { useColorScheme } from '@/hooks/useColorScheme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import * as SystemUI from 'expo-system-ui';
 import React, { useEffect, useRef, useState } from 'react';
-import { AppState } from 'react-native';
+import { AppState, Platform } from 'react-native';
 import 'react-native-reanimated';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { LanguageContext, ThemeContext } from './(tabs)/home';
-
-import { useColorScheme } from '@/hooks/useColorScheme';
 
 type Lang = 'tr' | 'en' | 'ja' | 'de';
 
@@ -22,16 +23,21 @@ export default function RootLayout() {
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
 
-  // App State yönetimi - uygulama arka plana geçtiğinde state'i koru
+  // ✅ Android için edge-to-edge arka plan
+  useEffect(() => {
+    if (Platform.OS === 'android') {
+      SystemUI.setBackgroundColorAsync('transparent');
+    }
+  }, []);
+
+  // App State yönetimi
   useEffect(() => {
     const subscription = AppState.addEventListener('change', nextAppState => {
       if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
         console.log('App has come to the foreground!');
-        // Uygulama tekrar aktif olduğunda gerekli işlemleri yap
       }
       appState.current = nextAppState;
     });
-
     return () => {
       subscription?.remove();
     };
@@ -60,30 +66,30 @@ export default function RootLayout() {
   }, [theme, colorScheme]);
 
   if (!loaded) {
-    // Async font loading only occurs in development.
     return null;
   }
 
   return (
-    <LanguageContext.Provider value={{ lang, setLang }}>
-      <ThemeContext.Provider value={{ theme, isDark, setTheme }}>
-        <ThemeProvider value={isDark ? DarkTheme : DefaultTheme}>
-          <Stack
-            screenOptions={{
-              // Uygulama arka planda kalırken state'i koru
-              freezeOnBlur: false,
-              // Navigation state'ini koru
-              gestureEnabled: true,
-              // Header'ı gizle (eğer gerekirse)
-              headerShown: false,
-            }}
-          >
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen name="+not-found" />
-          </Stack>
-          <StatusBar style="auto" />
-        </ThemeProvider>
-      </ThemeContext.Provider>
-    </LanguageContext.Provider>
+    <SafeAreaProvider>
+      <LanguageContext.Provider value={{ lang, setLang }}>
+        <ThemeContext.Provider value={{ theme, isDark, setTheme }}>
+          <ThemeProvider value={isDark ? DarkTheme : DefaultTheme}>
+            <Stack
+              screenOptions={{
+                freezeOnBlur: false,
+                gestureEnabled: true,
+                headerShown: false,
+              }}
+            >
+              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+              <Stack.Screen name="+not-found" />
+            </Stack>
+
+            {/* ✅ StatusBar edge-to-edge uyumlu */}
+            <StatusBar style="light" translucent backgroundColor="transparent" />
+          </ThemeProvider>
+        </ThemeContext.Provider>
+      </LanguageContext.Provider>
+    </SafeAreaProvider>
   );
 }

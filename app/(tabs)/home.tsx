@@ -677,13 +677,19 @@ export default function HomeScreen() {
     if (!city && location) {
       setLoading(true);
       setError('');
-      getWeatherByLocation(location.latitude, location.longitude, lang)
-        .then(data => {
-          setWeather(data);
+      // GÜNCELLEME: Hem weather hem forecast çekilecek
+      Promise.all([
+        getWeatherByLocation(location.latitude, location.longitude, lang),
+        get5DayForecastByLocation(location.latitude, location.longitude, lang)
+      ])
+        .then(([weatherData, forecastData]) => {
+          setWeather(weatherData);
+          setForecast(forecastData);
         })
         .catch(() => {
           setError(t('errorNoLocation'));
           setWeather(null);
+          setForecast(null);
         })
         .finally(() => setLoading(false));
     }
