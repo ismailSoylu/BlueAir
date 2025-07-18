@@ -80,7 +80,7 @@ export const translations = {
     rainWarning: 'Şemsiyenizi almayı unutmayın!',
     snowWarning: 'Yollarda dikkatli olun, kaygan olabilir!',
     thunderWarning: 'Fırtınaya dikkat edin, güvende kalın!',
-    birthdayToday: 'Doğum günün kutlu olsun, {name}! ��',
+    birthdayToday: 'Doğum günün kutlu olsun, {name}! 🎂',
     birthdaySoon: 'Doğum günü yaklaşıyor! ({name})',
   },
   en: {
@@ -824,6 +824,7 @@ export default function HomeScreen() {
                 onFocus={onInputFocus}
                 autoCorrect={false}
                 autoCapitalize="none"
+                allowFontScaling={true}
               />
               <Text style={{ fontSize: 13, color: isDark ? '#b3c6f7' : '#888', marginTop: 2, marginBottom: 6 }}>
                 {t('searchHelper')}
@@ -1378,6 +1379,7 @@ const styles = StyleSheet.create({
     marginVertical: 12,
     minWidth: 260,
     maxWidth: 400,
+    allowFontScaling: true,
   },
   darkInput: {
     backgroundColor: '#232a36',
