@@ -13,7 +13,7 @@ Users can view real-time weather updates and 5-day forecasts based on city names
 
 ## 🚀 Features
 
-- 🌐 Multi-language support (Turkish, English, Japanese, German)
+- 🌐 Multi-language support (Turkish, English, Japanese, German, Portuguese)
 - 🎨 Theme selection (Light / Dark / Auto)
 - 📍 Weather based on current location
 - 🔍 City search with suggestion system
