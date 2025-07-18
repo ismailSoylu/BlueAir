@@ -280,10 +280,10 @@ export default function SettingsScreen() {
       <SafeAreaView style={{ flex: 1 }}>
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }} showsVerticalScrollIndicator={false}>
           <View style={[styles.card, isDark && styles.darkCard]}>
-            <Text style={[styles.title, isDark && styles.darkText]}>{t('settingsTitle')}</Text>
+            <Text style={[styles.title, isDark && styles.darkText]} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>{t('settingsTitle')}</Text>
             {/* --- DOĞUM GÜNÜ EKLEME --- */}
             <View style={{ width: '100%', marginBottom: 20, alignItems: 'center' }}>
-              <Text style={[styles.label, isDark && styles.darkText]}>{t('birthdayAddTitle')}</Text>
+              <Text style={[styles.label, isDark && styles.darkText]} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>{t('birthdayAddTitle')}</Text>
               <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8, width: '100%', gap: 8 }}>
                 <TextInput
                   style={{
@@ -308,7 +308,7 @@ export default function SettingsScreen() {
                 />
                 <TouchableOpacity onPress={() => setShowDatePicker(true)} style={{ backgroundColor: '#e3e8f7', borderRadius: 16, height: 48, minWidth: 48, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 10, flexDirection: 'row' }}>
                   <MaterialCommunityIcons name="calendar" size={22 * PixelRatio.getFontScale()} color="#007AFF" />
-                  <Text style={{ color: '#007AFF', fontSize: 13 * PixelRatio.getFontScale(), marginLeft: 4 }} numberOfLines={1} adjustsFontSizeToFit allowFontScaling>
+                  <Text style={{ color: '#007AFF', fontSize: 13 * PixelRatio.getFontScale(), marginLeft: 4, minWidth: 0, maxWidth: '100%', flexShrink: 1 }} numberOfLines={1} adjustsFontSizeToFit allowFontScaling>
                     {bdayDate ? bdayDate.toLocaleDateString() : t('birthdayDatePlaceholder')}
                   </Text>
                 </TouchableOpacity>
@@ -329,7 +329,7 @@ export default function SettingsScreen() {
                 />
               )}
               {addError ? (
-                <Text style={{ color: '#e53935', fontSize: 13 * PixelRatio.getFontScale(), marginBottom: 4 }} allowFontScaling numberOfLines={2} adjustsFontSizeToFit>{addError}</Text>
+                <Text style={{ color: '#e53935', fontSize: 13 * PixelRatio.getFontScale(), marginBottom: 4, minWidth: 0, maxWidth: '100%', flexShrink: 1 }} allowFontScaling numberOfLines={2} adjustsFontSizeToFit>{addError}</Text>
               ) : null}
               {/* Doğum günleri listesi */}
               {birthdays.length > 0 && (
@@ -344,7 +344,7 @@ export default function SettingsScreen() {
                       padding: 8
                     }}>
                       <MaterialCommunityIcons name="cake-variant" size={20} color="#ffb347" style={{ marginRight: 8 }} />
-                      <Text style={{ color: isDark ? '#fffbe6' : '#222', fontWeight: 'bold', flex: 1 }}>
+                      <Text style={{ color: isDark ? '#fffbe6' : '#222', fontWeight: 'bold', flex: 1, minWidth: 0, maxWidth: '100%', flexShrink: 1 }} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>
                         {b.name} - {new Date(b.date).toLocaleDateString()} ({t('daysLeft').replace('{days}', daysUntilBirthday(b.date).toString())})
                       </Text>
                       <TouchableOpacity onPress={() => handleRemoveBirthday(b.id)}>
@@ -358,50 +358,50 @@ export default function SettingsScreen() {
             <View style={styles.section}>
               <View style={styles.sectionHeader}>
                 <MaterialCommunityIcons name="translate" size={22} color={isDark ? '#b3c6f7' : '#007AFF'} style={{ marginRight: 8 }} />
-                <Text style={[styles.label, isDark && styles.darkText]}>{t('language')}</Text>
+                <Text style={[styles.label, isDark && styles.darkText]} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>{t('language')}</Text>
               </View>
               <View style={styles.row}>
                 <TouchableOpacity style={[styles.themeBtn, lang === 'tr' && styles.selectedBtn]} onPress={() => setLang('tr')}>
-                  <Text style={[styles.themeBtnText, lang === 'tr' && styles.selectedBtnText]}>Türkçe</Text>
+                  <Text style={[styles.themeBtnText, lang === 'tr' && styles.selectedBtnText]} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>Türkçe</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={[styles.themeBtn, lang === 'en' && styles.selectedBtn]} onPress={() => setLang('en')}>
-                  <Text style={[styles.themeBtnText, lang === 'en' && styles.selectedBtnText]}>English</Text>
+                  <Text style={[styles.themeBtnText, lang === 'en' && styles.selectedBtnText]} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>English</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={[styles.themeBtn, lang === 'ja' && styles.selectedBtn]} onPress={() => setLang('ja')}>
-                  <Text style={[styles.themeBtnText, lang === 'ja' && styles.selectedBtnText]}>日本語</Text>
+                  <Text style={[styles.themeBtnText, lang === 'ja' && styles.selectedBtnText]} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>日本語</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={[styles.themeBtn, lang === 'de' && styles.selectedBtn]} onPress={() => setLang('de')}>
-                  <Text style={[styles.themeBtnText, lang === 'de' && styles.selectedBtnText]}>Deutsch</Text>
+                  <Text style={[styles.themeBtnText, lang === 'de' && styles.selectedBtnText]} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>Deutsch</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={[styles.themeBtn, lang === 'pt' && styles.selectedBtn]} onPress={() => setLang('pt')}>
-                  <Text style={[styles.themeBtnText, lang === 'pt' && styles.selectedBtnText]}>Português</Text>
+                  <Text style={[styles.themeBtnText, lang === 'pt' && styles.selectedBtnText]} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>Português</Text>
                 </TouchableOpacity>
               </View>
             </View>
             <View style={styles.section}>
               <View style={styles.sectionHeader}>
                 <MaterialCommunityIcons name="theme-light-dark" size={22} color={isDark ? '#b3c6f7' : '#007AFF'} style={{ marginRight: 8 }} />
-                <Text style={[styles.label, isDark && styles.darkText]}>{t('theme')}</Text>
+                <Text style={[styles.label, isDark && styles.darkText]} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>{t('theme')}</Text>
               </View>
               <View style={styles.row}>
                 <TouchableOpacity style={[styles.themeBtn, theme === 'light' && styles.selectedBtn]} onPress={() => selectTheme('light')}>
                   <MaterialCommunityIcons name="white-balance-sunny" size={18} color={theme === 'light' ? '#fff' : '#007AFF'} style={{ marginRight: 4 }} />
-                  <Text style={[styles.themeBtnText, theme === 'light' && styles.selectedBtnText]}>{t('light')}</Text>
+                  <Text style={[styles.themeBtnText, theme === 'light' && styles.selectedBtnText]} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>{t('light')}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={[styles.themeBtn, theme === 'dark' && styles.selectedBtn]} onPress={() => selectTheme('dark')}>
                   <MaterialCommunityIcons name="weather-night" size={18} color={theme === 'dark' ? '#fff' : '#007AFF'} style={{ marginRight: 4 }} />
-                  <Text style={[styles.themeBtnText, theme === 'dark' && styles.selectedBtnText]}>{t('dark')}</Text>
+                  <Text style={[styles.themeBtnText, theme === 'dark' && styles.selectedBtnText]} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>{t('dark')}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={[styles.themeBtn, theme === 'auto' && styles.selectedBtn]} onPress={() => selectTheme('auto')}>
                   <MaterialCommunityIcons name="autorenew" size={18} color={theme === 'auto' ? '#fff' : '#007AFF'} style={{ marginRight: 4 }} />
-                  <Text style={[styles.themeBtnText, theme === 'auto' && styles.selectedBtnText]}>{t('auto')}</Text>
+                  <Text style={[styles.themeBtnText, theme === 'auto' && styles.selectedBtnText]} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>{t('auto')}</Text>
                 </TouchableOpacity>
               </View>
             </View>
             <View style={styles.section}>
               <View style={styles.sectionHeader}>
                 <MaterialCommunityIcons name="star" size={22} color={isDark ? '#b3c6f7' : '#007AFF'} style={{ marginRight: 8 }} />
-                <Text style={[styles.label, isDark && styles.darkText, styles.centeredLabel]}>{t('rateUs')}</Text>
+                <Text style={[styles.label, isDark && styles.darkText, styles.centeredLabel]} allowFontScaling numberOfLines={2} adjustsFontSizeToFit>{t('rateUs')}</Text>
                 <MaterialCommunityIcons name="star" size={22} color={isDark ? '#b3c6f7' : '#007AFF'} style={{ marginLeft: 8 }} />
               </View>
               <View style={styles.starsContainer}>
@@ -415,12 +415,12 @@ export default function SettingsScreen() {
                 style={[styles.rateButton, isDark && styles.darkRateButton]} 
                 onPress={openPlayStore}
               >
-                <Text style={[styles.rateButtonText, isDark && styles.darkRateButtonText]}>
+                <Text style={[styles.rateButtonText, isDark && styles.darkRateButtonText]} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>
                   {t('rateButton')}
                 </Text>
               </TouchableOpacity>
             </View>
-            <Text style={[styles.info, isDark && styles.darkText]}>{t('info')}</Text>
+            <Text style={[styles.info, isDark && styles.darkText]} allowFontScaling numberOfLines={3} adjustsFontSizeToFit>{t('info')}</Text>
           </View>
         </ScrollView>
       </SafeAreaView>

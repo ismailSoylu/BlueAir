@@ -795,19 +795,19 @@ export default function HomeScreen() {
             top: 0, left: 0, right: 0, zIndex: 1
           }} />
           <ScrollView contentContainerStyle={{ paddingBottom: 40, paddingHorizontal: 8 }} showsVerticalScrollIndicator={false}>
-            <Text style={[styles.title, isDark && styles.darkText]}>{t('weather')}</Text>
-            <Text style={{textAlign: 'center', fontSize: 15, color: isDark ? '#fff' : '#222', marginBottom: 4}}>
+            <Text style={[styles.title, isDark && styles.darkText]} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>{t('weather')}</Text>
+            <Text style={{textAlign: 'center', fontSize: 15, color: isDark ? '#fff' : '#222', marginBottom: 4, minWidth: 0, maxWidth: '100%', flexShrink: 1}} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>
               {currentTime.toLocaleTimeString()}
             </Text>
             {/* Favori şehirler kutusu */}
             {favorites.length > 0 && (
               <View style={[styles.favBox, isDark && styles.darkFavBox]}>
-                <Text style={[styles.favBoxTitle, isDark && styles.darkText]}>{t('favorites')}</Text>
+                <Text style={[styles.favBoxTitle, isDark && styles.darkText]} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>{t('favorites')}</Text>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.favList}>
                   {favorites.map((fav, i) => (
                     <TouchableOpacity key={`fav-${fav}-${i}`} style={styles.favItem} onPress={() => fetchWeatherForFavorite(fav)} onLongPress={() => toggleFavorite(fav)}>
                       <MaterialCommunityIcons name="star" size={18} color="#FFD700" style={{ marginRight: 4 }} />
-                      <Text style={styles.favText}>{fav}</Text>
+                      <Text style={styles.favText} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>{fav}</Text>
                     </TouchableOpacity>
                   ))}
                 </ScrollView>
@@ -824,9 +824,9 @@ export default function HomeScreen() {
                 onFocus={onInputFocus}
                 autoCorrect={false}
                 autoCapitalize="none"
-                allowFontScaling={true}
+                allowFontScaling
               />
-              <Text style={{ fontSize: 13, color: isDark ? '#b3c6f7' : '#888', marginTop: 2, marginBottom: 6 }}>
+              <Text style={{ fontSize: 13, color: isDark ? '#b3c6f7' : '#888', marginTop: 2, marginBottom: 6, minWidth: 0, maxWidth: '100%', flexShrink: 1 }} allowFontScaling numberOfLines={2} adjustsFontSizeToFit>
                 {t('searchHelper')}
               </Text>
               {citySuggestions.length > 0 && (
@@ -851,7 +851,7 @@ export default function HomeScreen() {
                 >
                   {citySuggestions.map((s, i) => (
                     <TouchableOpacity key={`suggestion-${s}-${i}`} onPress={() => onSuggestionPress(s)} style={{ padding: 12, borderBottomWidth: 1, borderBottomColor: isDark ? '#333' : '#eee' }}>
-                      <Text style={{ color: isDark ? '#fff' : '#222', fontSize: 16 }}>{s}</Text>
+                      <Text style={{ color: isDark ? '#fff' : '#222', fontSize: 16, minWidth: 0, maxWidth: '100%', flexShrink: 1 }} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>{s}</Text>
                     </TouchableOpacity>
                   ))}
                 </ScrollView>
@@ -859,11 +859,11 @@ export default function HomeScreen() {
               <View style={styles.buttonRow}>
                 <TouchableOpacity style={[styles.button, {flex: 1, marginRight: 6, minWidth: 0}]} onPress={() => fetchWeather()}>
                   <MaterialCommunityIcons name="magnify" size={22} color="#fff" />
-                  <Text style={styles.buttonText} numberOfLines={1} ellipsizeMode="tail">{t('search')}</Text>
+                  <Text style={styles.buttonText} numberOfLines={1} ellipsizeMode="tail" allowFontScaling adjustsFontSizeToFit>{t('search')}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={[styles.locationButton, {flex: 1, marginLeft: 6, minWidth: 0}]} onPress={fetchWeatherByLocation}>
                   <MaterialCommunityIcons name="map-marker" size={22} color="#fff" />
-                  <Text style={styles.buttonText} numberOfLines={1} ellipsizeMode="tail">{t('findByLocation')}</Text>
+                  <Text style={styles.buttonText} numberOfLines={1} ellipsizeMode="tail" allowFontScaling adjustsFontSizeToFit>{t('findByLocation')}</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -871,7 +871,7 @@ export default function HomeScreen() {
             {birthdayToday && (
               <View style={{backgroundColor: '#FFF3E0', borderRadius: 12, padding: 12, marginVertical: 10, alignItems: 'center', flexDirection: 'row', justifyContent: 'center'}}>
                 <MaterialCommunityIcons name="cake-variant" size={24} color="#ffb347" style={{ marginRight: 8 }} />
-                <Text style={{color: '#e65100', fontWeight: 'bold', fontSize: 16}}>
+                <Text style={{color: '#e65100', fontWeight: 'bold', fontSize: 16, minWidth: 0, maxWidth: '100%', flexShrink: 1}} allowFontScaling numberOfLines={2} adjustsFontSizeToFit>
                   {t('birthdayToday').replace('{name}', birthdayToday.name)}
                 </Text>
               </View>
@@ -883,11 +883,11 @@ export default function HomeScreen() {
             )}
             {loading && <ActivityIndicator size="large" color={isDark ? '#fff' : '#0000ff'} />}
             {error && (
-              <Text style={[styles.error, isDark && styles.darkText]}>{error}</Text>
+              <Text style={[styles.error, isDark && styles.darkText]} allowFontScaling numberOfLines={2} adjustsFontSizeToFit>{error}</Text>
             )}
             {weather && (
               <View style={styles.weatherCard}>
-                <Text style={styles.cityName}>{turkceSehirAdi(weather.name)}</Text>
+                <Text style={styles.cityName} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>{turkceSehirAdi(weather.name)}</Text>
                 <View style={styles.tempRow}>
                   <View style={[getModernForecastIconStyle(isDark), { marginRight: 20, backgroundColor: 'transparent', shadowColor: 'transparent' }]}> 
                     {(() => {
@@ -904,11 +904,12 @@ export default function HomeScreen() {
                     })()}
                   </View>
                   <View>
-                    <Text style={styles.temperature}>{Math.round(weather.main.temp)}°C</Text>
+                    <Text style={styles.temperature} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>{Math.round(weather.main.temp)}°C</Text>
                     <Text
                       style={[styles.description, { maxWidth: 120, flexShrink: 1 }]}
                       numberOfLines={2}
                       ellipsizeMode="tail"
+                      allowFontScaling adjustsFontSizeToFit
                     >
                       {formatDescription(weather.weather[0].description)}
                     </Text>
@@ -917,43 +918,44 @@ export default function HomeScreen() {
                 <View style={styles.detailsRow}>
                   <View style={styles.detailBox}>
                     <MaterialCommunityIcons name="thermometer" size={20} color="#b3c6f7" />
-                    <Text style={styles.detailLabel}>{t('feelsLike')}</Text>
+                    <Text style={styles.detailLabel} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>{t('feelsLike')}</Text>
                     <Text
                       style={[
                         styles.detailValue,
                         weather.main.feels_like >= 30 && { backgroundColor: '#ffb3b3', color: '#b71c1c', borderRadius: 8, paddingHorizontal: 8, paddingVertical: 2 },
                         weather.main.feels_like <= 10 && { backgroundColor: '#b3d8ff', color: '#0d47a1', borderRadius: 8, paddingHorizontal: 8, paddingVertical: 2 }
                       ]}
+                      allowFontScaling adjustsFontSizeToFit
                     >
                       {Math.round(weather.main.feels_like)}°C
                     </Text>
                   </View>
                   <View style={styles.detailBox}>
                     <MaterialCommunityIcons name="water-percent" size={20} color="#b3c6f7" />
-                    <Text style={styles.detailLabel}>{t('humidity')}</Text>
-                    <Text style={styles.detailValue}>%{weather.main.humidity}</Text>
+                    <Text style={styles.detailLabel} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>{t('humidity')}</Text>
+                    <Text style={styles.detailValue} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>%{weather.main.humidity}</Text>
                   </View>
                   <View style={styles.detailBox}>
                     <MaterialCommunityIcons name="weather-windy" size={20} color="#b3c6f7" />
-                    <Text style={styles.detailLabel}>{t('wind')}</Text>
-                    <Text style={styles.detailValue}>{(weather.wind.speed * 3.6).toFixed(1)} km/sa</Text>
+                    <Text style={styles.detailLabel} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>{t('wind')}</Text>
+                    <Text style={styles.detailValue} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>{(weather.wind.speed * 3.6).toFixed(1)} km/sa</Text>
                   </View>
                 </View>
                 <View style={styles.detailsRow}>
                   <View style={styles.detailBox}>
                     <MaterialCommunityIcons name="gauge" size={20} color="#b3c6f7" />
-                    <Text style={styles.detailLabel}>{t('pressure')}</Text>
-                    <Text style={styles.detailValue}>{weather.main.pressure} hPa</Text>
+                    <Text style={styles.detailLabel} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>{t('pressure')}</Text>
+                    <Text style={styles.detailValue} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>{weather.main.pressure} hPa</Text>
                   </View>
                   <View style={styles.detailBox}>
                     <MaterialCommunityIcons name="weather-sunset-up" size={20} color="#b3c6f7" />
-                    <Text style={styles.detailLabel}>{t('sunrise')}</Text>
-                    <Text style={styles.detailValue}>{new Date(weather.sys.sunrise * 1000).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}</Text>
+                    <Text style={styles.detailLabel} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>{t('sunrise')}</Text>
+                    <Text style={styles.detailValue} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>{new Date(weather.sys.sunrise * 1000).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}</Text>
                   </View>
                   <View style={styles.detailBox}>
                     <MaterialCommunityIcons name="weather-sunset-down" size={20} color="#b3c6f7" />
-                    <Text style={styles.detailLabel}>{t('sunset')}</Text>
-                    <Text style={styles.detailValue}>{new Date(weather.sys.sunset * 1000).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}</Text>
+                    <Text style={styles.detailLabel} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>{t('sunset')}</Text>
+                    <Text style={styles.detailValue} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>{new Date(weather.sys.sunset * 1000).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}</Text>
                   </View>
                 </View>
               </View>
@@ -963,7 +965,7 @@ export default function HomeScreen() {
               <>
                 {(weather.main.temp >= 30 || weather.main.temp <= 0) && (
                   <View style={{backgroundColor: weather.main.temp >= 30 ? '#FFD700' : '#4FC3F7', padding: 12, borderRadius: 10, marginVertical: 10, alignItems: 'center'}}>
-                    <Text style={{color: '#222', fontWeight: 'bold', fontSize: 16}}>
+                    <Text style={{color: '#222', fontWeight: 'bold', fontSize: 16, minWidth: 0, maxWidth: '100%', flexShrink: 1}} allowFontScaling numberOfLines={2} adjustsFontSizeToFit>
                       {weather.main.temp >= 30 ? t('hotWarning') : t('coldWarning')}
                     </Text>
                   </View>
@@ -999,7 +1001,7 @@ export default function HomeScreen() {
                   const warningKey = getWeatherWarningKey(iconKey);
                   return warningKey ? (
                     <View style={{backgroundColor: '#FFF9C4', padding: 12, borderRadius: 10, marginVertical: 10, alignItems: 'center'}}>
-                      <Text style={{color: '#222', fontWeight: 'bold', fontSize: 16}}>
+                      <Text style={{color: '#222', fontWeight: 'bold', fontSize: 16, minWidth: 0, maxWidth: '100%', flexShrink: 1}} allowFontScaling numberOfLines={2} adjustsFontSizeToFit>
                         {t(warningKey)}
                       </Text>
                     </View>
@@ -1010,7 +1012,7 @@ export default function HomeScreen() {
             {/* 5 günlük tahmin: tekrar uyarı kutularının ALTINA aldık */}
             {forecast && (
               <View style={styles.forecastContainer}>
-                <Text style={[styles.forecastTitle, isDark && styles.darkText]}>{t('forecast5')}</Text>
+                <Text style={[styles.forecastTitle, isDark && styles.darkText]} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>{t('forecast5')}</Text>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                   {getDailyForecast(forecast.list).map(item => {
                     const isNight = isForecastNight(item.dt);
@@ -1021,7 +1023,7 @@ export default function HomeScreen() {
                     return (
                       <View style={styles.modernForecastItem} key={item.dt}>
                         <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                          <Text style={styles.modernForecastDay}>{forecastDate.toLocaleDateString(lang === 'de' ? 'de-DE' : lang === 'ja' ? 'ja-JP' : lang === 'en' ? 'en-US' : lang === 'pt' ? 'pt-PT' : 'tr-TR', { weekday: 'short', day: 'numeric', month: 'short' })}</Text>
+                          <Text style={styles.modernForecastDay} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>{forecastDate.toLocaleDateString(lang === 'de' ? 'de-DE' : lang === 'ja' ? 'ja-JP' : lang === 'en' ? 'en-US' : lang === 'pt' ? 'pt-PT' : 'tr-TR', { weekday: 'short', day: 'numeric', month: 'short' })}</Text>
                           {bday && (
                             <MaterialCommunityIcons name="cake-variant" size={18} color="#ffb347" style={{ marginLeft: 4 }} />
                           )}
@@ -1034,8 +1036,8 @@ export default function HomeScreen() {
                             style={{ width: 56, height: 56 }}
                           />
                         </View>
-                        <Text style={styles.modernForecastTemp}>{Math.round(item.main.temp)}°C</Text>
-                        <Text style={styles.modernForecastDesc} numberOfLines={2} ellipsizeMode="tail">{formatDescription(item.weather[0].description)}</Text>
+                        <Text style={styles.modernForecastTemp} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>{Math.round(item.main.temp)}°C</Text>
+                        <Text style={styles.modernForecastDesc} numberOfLines={2} ellipsizeMode="tail" allowFontScaling adjustsFontSizeToFit>{formatDescription(item.weather[0].description)}</Text>
                         {bday && (
                           <Text style={{ color: '#ff9800', fontWeight: 'bold', fontSize: 12, marginTop: 2 }}>
                             {t('birthdaySoon').replace('{name}', bday.name)}
@@ -1050,7 +1052,7 @@ export default function HomeScreen() {
             {/* 3 saatlik tahmin */}
             {forecast && (
               <View style={[styles.hourlyCard, isDark && styles.darkHourlyCard, { width: '100%', alignSelf: 'center', marginTop: 12 }]}> 
-                <Text style={[styles.forecastTitle, isDark && styles.darkText]}>{t('forecast3h')}</Text>
+                <Text style={[styles.forecastTitle, isDark && styles.darkText]} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>{t('forecast3h')}</Text>
                 {forecast.list && forecast.list.length > 0 ? (
                   <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                     {forecast.list.slice(0, 8).map(item => {
@@ -1074,7 +1076,7 @@ export default function HomeScreen() {
                       }
                       return (
                         <View style={styles.modernForecastItem} key={item.dt + '-hourly'}>
-                          <Text style={styles.modernForecastDay}>{new Date(item.dt_txt).toLocaleTimeString(lang === 'de' ? 'de-DE' : lang === 'ja' ? 'ja-JP' : lang === 'en' ? 'en-US' : 'tr-TR', { hour: '2-digit', minute: '2-digit' })}</Text>
+                          <Text style={styles.modernForecastDay} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>{new Date(item.dt_txt).toLocaleTimeString(lang === 'de' ? 'de-DE' : lang === 'ja' ? 'ja-JP' : lang === 'en' ? 'en-US' : 'tr-TR', { hour: '2-digit', minute: '2-digit' })}</Text>
                           <View style={getModernForecastIconStyle(isDark)}>
                             <LottieView
                               source={getWeatherLottie(item.weather[0].main, isNight)}
@@ -1083,23 +1085,21 @@ export default function HomeScreen() {
                               style={{ width: 56, height: 56 }}
                             />
                           </View>
-                          <Text style={styles.modernForecastTemp}>{Math.round(item.main.temp)}°C</Text>
-                          <Text style={styles.modernForecastDesc} numberOfLines={2} ellipsizeMode="tail">{formatDescription(item.weather?.[0]?.description || '')}</Text>
+                          <Text style={styles.modernForecastTemp} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>{Math.round(item.main.temp)}°C</Text>
+                          <Text style={styles.modernForecastDesc} numberOfLines={2} ellipsizeMode="tail" allowFontScaling adjustsFontSizeToFit>{formatDescription(item.weather?.[0]?.description || '')}</Text>
                         </View>
                       );
                     })}
                   </ScrollView>
                 ) : (
-                  <Text style={{ color: isDark ? '#fff' : '#222', textAlign: 'center', marginTop: 12 }}>{forecast ? t('loading') || 'Veri yükleniyor...' : t('noData') || 'Veri yok'}</Text>
+                  <Text style={{ color: isDark ? '#fff' : '#222', textAlign: 'center', marginTop: 12, minWidth: 0, maxWidth: '100%', flexShrink: 1 }} allowFontScaling numberOfLines={2} adjustsFontSizeToFit>{forecast ? t('loading') || 'Veri yükleniyor...' : t('noData') || 'Veri yok'}</Text>
                 )}
               </View>
             )}
             {/* --- SAĞLIK ÖNERİSİ --- */}
             <View style={{marginTop: 24, marginBottom: 12, alignItems: 'center'}}>
               <View style={{backgroundColor: isDark ? '#232a36' : '#e3f0ff', borderRadius: 12, padding: 12, maxWidth: 340}}>
-                <Text style={{color: isDark ? '#b3c6f7' : '#007AFF', fontWeight: 'bold', fontSize: 15, textAlign: 'center'}}>
-                  {healthTipText}
-                </Text>
+                <Text style={{color: isDark ? '#b3c6f7' : '#007AFF', fontWeight: 'bold', fontSize: 15, textAlign: 'center', minWidth: 0, maxWidth: 340, flexShrink: 1}} allowFontScaling numberOfLines={2} adjustsFontSizeToFit>{healthTipText}</Text>
               </View>
             </View>
             {/* Alt navigation bar/safe area için arka plan rengi */}
@@ -1379,7 +1379,6 @@ const styles = StyleSheet.create({
     marginVertical: 12,
     minWidth: 260,
     maxWidth: 400,
-    allowFontScaling: true,
   },
   darkInput: {
     backgroundColor: '#232a36',
