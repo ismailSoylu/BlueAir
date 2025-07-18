@@ -2,6 +2,7 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
+import * as Localization from 'expo-localization';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import * as SystemUI from 'expo-system-ui';
@@ -17,7 +18,16 @@ export default function RootLayout() {
   const colorScheme = useColorScheme();
   const [theme, setTheme] = useState<'light' | 'dark' | 'auto'>('auto');
   const [isDark, setIsDark] = useState(false);
-  const [lang, setLang] = useState<Lang>('tr');
+  const supportedLanguages: Lang[] = ['tr', 'en', 'ja', 'de', 'pt'];
+  function getDefaultLanguage(): Lang {
+    const locales = Localization.getLocales();
+    const deviceLang = locales && locales.length > 0 && locales[0].languageCode ? locales[0].languageCode : 'en';
+    if (supportedLanguages.includes(deviceLang as Lang)) {
+      return deviceLang as Lang;
+    }
+    return 'en';
+  }
+  const [lang, setLang] = useState<Lang>(getDefaultLanguage());
   const appState = useRef(AppState.currentState);
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),

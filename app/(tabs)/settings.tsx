@@ -3,7 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useContext, useEffect, useState } from 'react';
-import { Linking, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Linking, PixelRatio, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { addBirthday, Birthday, getBirthdays, removeBirthday } from '../../services/birthdayService';
 import { scheduleBirthdayNotification } from '../../services/notificationService';
@@ -256,7 +256,6 @@ export default function SettingsScreen() {
     }
     setAddError('');
     try {
-      console.log('Doğum günü ekleniyor:', bdayName, bdayDate, lang);
       await addBirthday({ id: simpleId(), name: bdayName.trim(), date: bdayDate.toISOString().slice(0, 10) });
       await scheduleBirthdayNotification(bdayDate, bdayName.trim(), lang);
       setBdayName('');
@@ -285,31 +284,36 @@ export default function SettingsScreen() {
             {/* --- DOĞUM GÜNÜ EKLEME --- */}
             <View style={{ width: '100%', marginBottom: 20, alignItems: 'center' }}>
               <Text style={[styles.label, isDark && styles.darkText]}>{t('birthdayAddTitle')}</Text>
-              <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8, width: '100%', gap: 8 }}>
                 <TextInput
                   style={{
                     backgroundColor: isDark ? '#232a36' : '#fff',
                     color: isDark ? '#fff' : '#222',
-                    borderRadius: 8,
+                    borderRadius: 16,
                     borderWidth: 1,
                     borderColor: '#e0e7ff',
-                    paddingHorizontal: 10,
-                    paddingVertical: 8,
-                    marginRight: 8,
-                    minWidth: 100,
+                    paddingHorizontal: 14,
+                    height: 48,
+                    fontSize: 16 * PixelRatio.getFontScale(),
                     flex: 1,
                   }}
                   placeholder={t('birthdayNamePlaceholder')}
                   placeholderTextColor={isDark ? '#aaa' : '#888'}
                   value={bdayName}
                   onChangeText={setBdayName}
+                  allowFontScaling
+                  maxLength={32}
+                  returnKeyType="done"
+                  accessible accessibilityLabel={t('birthdayNamePlaceholder')}
                 />
-                <TouchableOpacity onPress={() => setShowDatePicker(true)} style={{ backgroundColor: '#e3e8f7', borderRadius: 8, padding: 8, marginRight: 8 }}>
-                  <MaterialCommunityIcons name="calendar" size={22} color="#007AFF" />
-                  <Text style={{ color: '#007AFF', fontSize: 13 }}>{bdayDate ? bdayDate.toLocaleDateString() : t('birthdayDatePlaceholder')}</Text>
+                <TouchableOpacity onPress={() => setShowDatePicker(true)} style={{ backgroundColor: '#e3e8f7', borderRadius: 16, height: 48, minWidth: 48, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 10, flexDirection: 'row' }}>
+                  <MaterialCommunityIcons name="calendar" size={22 * PixelRatio.getFontScale()} color="#007AFF" />
+                  <Text style={{ color: '#007AFF', fontSize: 13 * PixelRatio.getFontScale(), marginLeft: 4 }} numberOfLines={1} adjustsFontSizeToFit allowFontScaling>
+                    {bdayDate ? bdayDate.toLocaleDateString() : t('birthdayDatePlaceholder')}
+                  </Text>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={handleAddBirthday} style={{ backgroundColor: '#34c759', borderRadius: 8, padding: 10 }}>
-                  <MaterialCommunityIcons name="plus" size={22} color="#fff" />
+                <TouchableOpacity onPress={handleAddBirthday} style={{ backgroundColor: '#4caf50', borderRadius: 16, height: 48, width: 48, justifyContent: 'center', alignItems: 'center' }} accessibilityLabel="Ekle">
+                  <MaterialCommunityIcons name="plus" size={26 * PixelRatio.getFontScale()} color="#fff" />
                 </TouchableOpacity>
               </View>
               {showDatePicker && (
@@ -325,7 +329,7 @@ export default function SettingsScreen() {
                 />
               )}
               {addError ? (
-                <Text style={{ color: '#e53935', fontSize: 13, marginBottom: 4 }}>{addError}</Text>
+                <Text style={{ color: '#e53935', fontSize: 13 * PixelRatio.getFontScale(), marginBottom: 4 }} allowFontScaling numberOfLines={2} adjustsFontSizeToFit>{addError}</Text>
               ) : null}
               {/* Doğum günleri listesi */}
               {birthdays.length > 0 && (
