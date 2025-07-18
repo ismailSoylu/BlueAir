@@ -1,10 +1,15 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { LinearGradient } from 'expo-linear-gradient';
-import React, { useContext } from 'react';
-import { Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useContext, useEffect, useState } from 'react';
+import { Linking, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { addBirthday, Birthday, getBirthdays, removeBirthday } from '../../services/birthdayService';
+import { scheduleBirthdayNotification } from '../../services/notificationService';
 import { LanguageContext, ThemeContext } from './home';
+// uuid yerine basit bir id fonksiyonu
+const simpleId = () => Math.random().toString(36).substr(2, 9) + Date.now();
 
 const THEME_KEY = 'APP_THEME';
 
@@ -45,6 +50,11 @@ export const translations: Record<string, Record<string, string>> = {
     sunset: 'G. Batımı',
     rateUs: 'Bizi desteklemek ister misiniz? Uygulamamızı beğendiyseniz 5 yıldız verebilirsiniz!',
     rateButton: '5 Yıldız Ver',
+    birthdayAddTitle: 'Doğum Günü Ekle',
+    birthdayNamePlaceholder: 'İsim',
+    birthdayDatePlaceholder: 'Tarih',
+    birthdayAddError: 'Lütfen isim ve tarih girin',
+    daysLeft: '{days} gün kaldı',
   },
   en: {
     weather: 'Weather',
@@ -79,6 +89,11 @@ export const translations: Record<string, Record<string, string>> = {
     sunset: 'Sunset',
     rateUs: 'Would you like to support us? If you like the app, you can give 5 stars!',
     rateButton: 'Rate 5 Stars',
+    birthdayAddTitle: 'Add Birthday',
+    birthdayNamePlaceholder: 'Name',
+    birthdayDatePlaceholder: 'Date',
+    birthdayAddError: 'Please enter a name and date',
+    daysLeft: '{days} days left',
   },
   ja: {
     weather: '天気',
@@ -113,6 +128,11 @@ export const translations: Record<string, Record<string, string>> = {
     sunset: '日の入り',
     rateUs: '応援していただけますか？アプリが気に入ったら5つ星をお願いします！',
     rateButton: '5つ星を付ける',
+    birthdayAddTitle: '誕生日を追加',
+    birthdayNamePlaceholder: '名前',
+    birthdayDatePlaceholder: '日付',
+    birthdayAddError: '名前と日付を入力してください',
+    daysLeft: 'あと{days}日',
   },
   de: {
     weather: 'Wetter',
@@ -147,7 +167,22 @@ export const translations: Record<string, Record<string, string>> = {
     sunset: 'Sonnenuntergang',
     rateUs: 'Möchten Sie uns unterstützen? Wenn Ihnen die App gefällt, geben Sie bitte 5 Sterne!',
     rateButton: '5 Sterne geben',
+    birthdayAddTitle: 'Geburtstag hinzufügen',
+    birthdayNamePlaceholder: 'Name',
+    birthdayDatePlaceholder: 'Datum',
+    birthdayAddError: 'Bitte Name und Datum eingeben',
+    daysLeft: 'Noch {days} Tage',
   },
+};
+
+// Doğum gününe kaç gün kaldığını hesaplayan fonksiyon
+const daysUntilBirthday = (dateStr: string) => {
+  const today = new Date();
+  const [year, month, day] = dateStr.split('-').map(Number);
+  let next = new Date(today.getFullYear(), month - 1, day);
+  if (next < today) next = new Date(today.getFullYear() + 1, month - 1, day);
+  const diff = Math.ceil((next.getTime() - today.setHours(0,0,0,0)) / (1000 * 60 * 60 * 24));
+  return diff;
 };
 
 export default function SettingsScreen() {
@@ -164,6 +199,41 @@ export default function SettingsScreen() {
     Linking.openURL(PLAY_STORE_URL);
   };
 
+  const [bdayName, setBdayName] = useState('');
+  const [bdayDate, setBdayDate] = useState<Date | null>(null);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [birthdays, setBirthdays] = useState<Birthday[]>([]);
+  const [refresh, setRefresh] = useState(false);
+  const [addError, setAddError] = useState('');
+
+  useEffect(() => {
+    getBirthdays().then(setBirthdays);
+  }, [refresh]);
+
+  const handleAddBirthday = async () => {
+    if (!bdayName.trim() || !bdayDate) {
+      setAddError(t('birthdayAddError'));
+      return;
+    }
+    setAddError('');
+    try {
+      console.log('Doğum günü ekleniyor:', bdayName, bdayDate, lang);
+      await addBirthday({ id: simpleId(), name: bdayName.trim(), date: bdayDate.toISOString().slice(0, 10) });
+      await scheduleBirthdayNotification(bdayDate, bdayName.trim(), lang);
+      setBdayName('');
+      setBdayDate(null);
+      setRefresh(r => !r);
+    } catch (err) {
+      setAddError('Hata: ' + (err instanceof Error ? err.message : String(err)));
+      console.log('Doğum günü ekleme hatası:', err);
+    }
+  };
+
+  const handleRemoveBirthday = async (id: string) => {
+    await removeBirthday(id);
+    setRefresh(r => !r);
+  };
+
   return (
     <LinearGradient
       colors={isDark ? ['#232a36', '#181a20'] : ['#b3c6f7', '#e3f0ff']}
@@ -173,6 +243,75 @@ export default function SettingsScreen() {
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }} showsVerticalScrollIndicator={false}>
           <View style={[styles.card, isDark && styles.darkCard]}>
             <Text style={[styles.title, isDark && styles.darkText]}>{t('settingsTitle')}</Text>
+            {/* --- DOĞUM GÜNÜ EKLEME --- */}
+            <View style={{ width: '100%', marginBottom: 20, alignItems: 'center' }}>
+              <Text style={[styles.label, isDark && styles.darkText]}>{t('birthdayAddTitle')}</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
+                <TextInput
+                  style={{
+                    backgroundColor: isDark ? '#232a36' : '#fff',
+                    color: isDark ? '#fff' : '#222',
+                    borderRadius: 8,
+                    borderWidth: 1,
+                    borderColor: '#e0e7ff',
+                    paddingHorizontal: 10,
+                    paddingVertical: 8,
+                    marginRight: 8,
+                    minWidth: 100,
+                    flex: 1,
+                  }}
+                  placeholder={t('birthdayNamePlaceholder')}
+                  placeholderTextColor={isDark ? '#aaa' : '#888'}
+                  value={bdayName}
+                  onChangeText={setBdayName}
+                />
+                <TouchableOpacity onPress={() => setShowDatePicker(true)} style={{ backgroundColor: '#e3e8f7', borderRadius: 8, padding: 8, marginRight: 8 }}>
+                  <MaterialCommunityIcons name="calendar" size={22} color="#007AFF" />
+                  <Text style={{ color: '#007AFF', fontSize: 13 }}>{bdayDate ? bdayDate.toLocaleDateString() : t('birthdayDatePlaceholder')}</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={handleAddBirthday} style={{ backgroundColor: '#34c759', borderRadius: 8, padding: 10 }}>
+                  <MaterialCommunityIcons name="plus" size={22} color="#fff" />
+                </TouchableOpacity>
+              </View>
+              {showDatePicker && (
+                <DateTimePicker
+                  value={bdayDate || new Date()}
+                  mode="date"
+                  display="default"
+                  onChange={(e: DateTimePickerEvent, date?: Date) => {
+                    setShowDatePicker(false);
+                    if (date) setBdayDate(date);
+                  }}
+                  maximumDate={new Date()}
+                />
+              )}
+              {addError ? (
+                <Text style={{ color: '#e53935', fontSize: 13, marginBottom: 4 }}>{addError}</Text>
+              ) : null}
+              {/* Doğum günleri listesi */}
+              {birthdays.length > 0 && (
+                <View style={{ width: '100%', marginTop: 10 }}>
+                  {birthdays.map(b => (
+                    <View key={b.id} style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      marginBottom: 6,
+                      backgroundColor: isDark ? '#232a36' : '#f8fafc',
+                      borderRadius: 8,
+                      padding: 8
+                    }}>
+                      <MaterialCommunityIcons name="cake-variant" size={20} color="#ffb347" style={{ marginRight: 8 }} />
+                      <Text style={{ color: isDark ? '#fffbe6' : '#222', fontWeight: 'bold', flex: 1 }}>
+                        {b.name} - {new Date(b.date).toLocaleDateString()} ({t('daysLeft').replace('{days}', daysUntilBirthday(b.date).toString())})
+                      </Text>
+                      <TouchableOpacity onPress={() => handleRemoveBirthday(b.id)}>
+                        <MaterialCommunityIcons name="delete" size={20} color="#e53935" />
+                      </TouchableOpacity>
+                    </View>
+                  ))}
+                </View>
+              )}
+            </View>
             <View style={styles.section}>
               <View style={styles.sectionHeader}>
                 <MaterialCommunityIcons name="translate" size={22} color={isDark ? '#b3c6f7' : '#007AFF'} style={{ marginRight: 8 }} />

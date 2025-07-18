@@ -1,7 +1,9 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as BackgroundFetch from 'expo-background-fetch';
+import type { NotificationTriggerInput } from 'expo-notifications';
 import * as Notifications from 'expo-notifications';
 import * as TaskManager from 'expo-task-manager';
+import { Platform } from 'react-native';
 import { getWeatherByLocation } from './weatherService';
 
 const BACKGROUND_WEATHER_TASK = 'BACKGROUND_WEATHER_TASK';
@@ -83,5 +85,65 @@ export const stopBackgroundTask = async () => {
     await BackgroundFetch.unregisterTaskAsync(BACKGROUND_WEATHER_TASK);
   } catch (error) {
     console.error('Arka plan görevi durdurulamadı:', error);
+  }
+}; 
+
+// Doğum günü bildirimi planlama
+export const scheduleBirthdayNotification = async (date: Date, name: string, lang: string) => {
+  // Bildirim mesajlarını diller için ayarla
+  const messages: Record<string, { title: string; body: string }> = {
+    tr: {
+      title: 'Doğum Günü Kutlu Olsun! 🎂',
+      body: `Doğum günün kutlu olsun, ${name}!`,
+    },
+    en: {
+      title: 'Happy Birthday! 🎂',
+      body: `Happy birthday, ${name}!`,
+    },
+    ja: {
+      title: 'お誕生日おめでとう！🎂',
+      body: `お誕生日おめでとう、${name}さん！`,
+    },
+    de: {
+      title: 'Alles Gute zum Geburtstag! 🎂',
+      body: `Alles Gute zum Geburtstag, ${name}!`,
+    },
+  };
+  const msg = messages[lang] || messages['en'];
+
+  if (Platform.OS === 'ios') {
+    // iOS: ileri tarihli calendar trigger ile planla
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: msg.title,
+        body: msg.body,
+        sound: true,
+      },
+      trigger: {
+        type: 'calendar',
+        hour: 9,
+        minute: 0,
+        repeats: false,
+        year: date.getFullYear(),
+        month: date.getMonth() + 1,
+        day: date.getDate(),
+      } as NotificationTriggerInput,
+    });
+  } else {
+    // Android: sadece bugünkü doğum günleri için hemen bildir
+    const today = new Date();
+    if (
+      today.getDate() === date.getDate() &&
+      today.getMonth() === date.getMonth()
+    ) {
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: msg.title,
+          body: msg.body,
+          sound: true,
+        },
+        trigger: null,
+      });
+    }
   }
 }; 

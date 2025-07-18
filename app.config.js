@@ -6,7 +6,7 @@ export default {
     displayName: "Blue Air",
     slug: "blueAir",
     version: "1.0.3",
-    orientation: "portrait",
+    orientation: "default",
     icon: "./assets/images/icon.png",
     scheme: "blueair",
     userInterfaceStyle: "automatic",

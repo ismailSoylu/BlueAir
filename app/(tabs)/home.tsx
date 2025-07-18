@@ -12,6 +12,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { ActivityIndicator, Keyboard, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, ViewStyle } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useCurrentLocation } from '../../hooks/useCurrentLocation';
+import { Birthday, getBirthdays } from '../../services/birthdayService';
 import { ForecastData, ForecastItem, get5DayForecastByCity, get5DayForecastByLocation, getWeatherByCity, getWeatherByLocation, WeatherData } from '../../services/weatherService';
 
 const THEME_KEY = 'APP_THEME';
@@ -66,6 +67,21 @@ export const translations = {
     pressure: 'Basınç',
     sunrise: 'G. Doğumu',
     sunset: 'G. Batımı',
+    // --- UYARI METİNLERİ ---
+    hotWarning: 'Bol su içmeyi unutmayın ve güneşe karşı dikkatli olun!',
+    coldWarning: 'Hava çok soğuk, kalın giyinin ve sağlığınıza dikkat edin!',
+    clearDayWarning: 'Hava açık, güneşin tadını çıkarın!',
+    clearNightWarning: 'Hava açık, güzel bir gece!',
+    cloudyWarning: 'Hava bulutlu, yanınıza bir ceket alın!',
+    drizzleWarning: 'Hafif yağmur var, dikkatli olun!',
+    mistWarning: 'Görüş mesafesi düşük, dikkatli olun!',
+    partlyCloudyDayWarning: 'Parçalı bulutlu, hava değişken olabilir!',
+    partlyCloudyNightWarning: 'Parçalı bulutlu gece, serin olabilir!',
+    rainWarning: 'Şemsiyenizi almayı unutmayın!',
+    snowWarning: 'Yollarda dikkatli olun, kaygan olabilir!',
+    thunderWarning: 'Fırtınaya dikkat edin, güvende kalın!',
+    birthdayToday: 'Doğum günün kutlu olsun, {name}! 🎂',
+    birthdaySoon: 'Doğum günü yaklaşıyor! ({name})',
   },
   en: {
     weather: 'Weather',
@@ -98,6 +114,21 @@ export const translations = {
     pressure: 'Pressure',
     sunrise: 'Sunrise',
     sunset: 'Sunset',
+    // --- UYARI METİNLERİ ---
+    hotWarning: 'Don\'t forget to drink plenty of water and be careful in the sun!',
+    coldWarning: 'It\'s very cold, dress warmly and take care of your health!',
+    clearDayWarning: 'Clear sky, enjoy the sunshine!',
+    clearNightWarning: 'Clear night, have a pleasant evening!',
+    cloudyWarning: 'Cloudy, take a jacket with you!',
+    drizzleWarning: 'Light rain, be careful!',
+    mistWarning: 'Low visibility, be careful!',
+    partlyCloudyDayWarning: 'Partly cloudy, weather may change!',
+    partlyCloudyNightWarning: 'Partly cloudy night, it may be cool!',
+    rainWarning: 'Don\'t forget your umbrella!',
+    snowWarning: 'Be careful, roads may be slippery!',
+    thunderWarning: 'Beware of thunderstorms, stay safe!',
+    birthdayToday: 'Happy birthday, {name}! 🎂',
+    birthdaySoon: 'Birthday is coming soon! ({name})',
   },
   ja: {
     weather: '天気',
@@ -130,6 +161,21 @@ export const translations = {
     pressure: '気圧',
     sunrise: '日の出',
     sunset: '日の入り',
+    // --- UYARI METİNLERİ ---
+    hotWarning: '水分補給を忘れず、日差しに注意してください！',
+    coldWarning: 'とても寒いので、暖かくして体調に気をつけてください！',
+    clearDayWarning: '晴れです。太陽を楽しんでください！',
+    clearNightWarning: '晴れた夜です。素敵な夜を！',
+    cloudyWarning: '曇りです。上着を持って行きましょう！',
+    drizzleWarning: '小雨ですのでご注意ください！',
+    mistWarning: '視界が悪いのでご注意ください！',
+    partlyCloudyDayWarning: '曇り時々晴れです。天気の変化にご注意ください！',
+    partlyCloudyNightWarning: '曇り時々晴れの夜です。涼しいかもしれません！',
+    rainWarning: '傘を忘れずに！',
+    snowWarning: '道路が滑りやすいのでご注意ください！',
+    thunderWarning: '雷雨にご注意ください、安全にお過ごしください！',
+    birthdayToday: 'お誕生日おめでとう、{name}さん！🎂',
+    birthdaySoon: 'もうすぐ誕生日です！({name}さん)',
   },
   de: {
     weather: 'Wetter',
@@ -162,8 +208,41 @@ export const translations = {
     pressure: 'Luftdruck',
     sunrise: 'Sonnenaufgang',
     sunset: 'Sonnenuntergang',
+    // --- UYARI METİNLERİ ---
+    hotWarning: 'Trinken Sie viel Wasser und seien Sie vorsichtig in der Sonne!',
+    coldWarning: 'Es ist sehr kalt, ziehen Sie sich warm an und achten Sie auf Ihre Gesundheit!',
+    clearDayWarning: 'Klarer Himmel, genießen Sie die Sonne!',
+    clearNightWarning: 'Klare Nacht, einen schönen Abend!',
+    cloudyWarning: 'Bewölkt, nehmen Sie eine Jacke mit!',
+    drizzleWarning: 'Leichter Regen, seien Sie vorsichtig!',
+    mistWarning: 'Geringe Sichtweite, seien Sie vorsichtig!',
+    partlyCloudyDayWarning: 'Teilweise bewölkt, das Wetter kann wechseln!',
+    partlyCloudyNightWarning: 'Teilweise bewölkte Nacht, es kann kühl sein!',
+    rainWarning: 'Vergessen Sie Ihren Regenschirm nicht!',
+    snowWarning: 'Vorsicht, die Straßen könnten rutschig sein!',
+    thunderWarning: 'Vorsicht vor Gewittern, bleiben Sie sicher!',
+    birthdayToday: 'Alles Gute zum Geburtstag, {name}! 🎂',
+    birthdaySoon: 'Bald ist Geburtstag! ({name})',
   },
 };
+
+// Sağlık önerileri (tüm diller için tek dizi)
+const healthTips = [
+  { tr: 'Bol su için.', en: 'Drink plenty of water.', ja: 'たくさん水を飲みましょう。', de: 'Trinken Sie viel Wasser.' },
+  { tr: 'Her gün en az 5.000 adım atmaya çalışın.', en: 'Try to walk at least 5,000 steps every day.', ja: '毎日少なくとも5,000歩歩くようにしましょう。', de: 'Versuchen Sie, jeden Tag mindestens 5.000 Schritte zu gehen.' },
+  { tr: 'Düzenli egzersiz yapın.', en: 'Exercise regularly.', ja: '定期的に運動しましょう。', de: 'Machen Sie regelmäßig Sport.' },
+  { tr: 'Yeterince uyuyun.', en: 'Get enough sleep.', ja: '十分な睡眠をとりましょう。', de: 'Schlafen Sie ausreichend.' },
+  { tr: 'Dengeli beslenin.', en: 'Eat a balanced diet.', ja: 'バランスの良い食事をしましょう。', de: 'Ernähren Sie sich ausgewogen.' },
+  { tr: 'Güneşten korunun.', en: 'Protect yourself from the sun.', ja: '日差しに注意しましょう。', de: 'Schützen Sie sich vor der Sonne.' },
+  { tr: 'Ellerinizi sık sık yıkayın.', en: 'Wash your hands frequently.', ja: 'こまめに手を洗いましょう。', de: 'Waschen Sie häufig Ihre Hände.' },
+  { tr: 'Stresi azaltmaya çalışın.', en: 'Try to reduce stress.', ja: 'ストレスを減らすようにしましょう。', de: 'Versuchen Sie, Stress zu reduzieren.' },
+  { tr: 'Taze meyve ve sebze tüketin.', en: 'Eat fresh fruits and vegetables.', ja: '新鮮な果物と野菜を食べましょう。', de: 'Essen Sie frisches Obst und Gemüse.' },
+  { tr: 'Açık havada zaman geçirin.', en: 'Spend time outdoors.', ja: '外で過ごす時間を作りましょう。', de: 'Verbringen Sie Zeit im Freien.' },
+  { tr: 'Düzenli sağlık kontrolleri yaptırın.', en: 'Get regular health check-ups.', ja: '定期的に健康診断を受けましょう。', de: 'Lassen Sie regelmäßig Gesundheitschecks machen.' },
+  { tr: 'Kemik sağlığınız için D vitamini alın.', en: 'Get vitamin D for bone health.', ja: '骨の健康のためにビタミンDを摂りましょう。', de: 'Nehmen Sie Vitamin D für die Knochengesundheit.' },
+  { tr: 'Sosyal aktivitelere katılın.', en: 'Join social activities.', ja: '社会活動に参加しましょう。', de: 'Nehmen Sie an sozialen Aktivitäten teil.' },
+  { tr: 'Sebze ve meyve yemeyi unutmayın.', en: 'Don\'t forget to eat fruits and vegetables.', ja: '果物と野菜を食べるのを忘れずに。', de: 'Vergessen Sie nicht, Obst und Gemüse zu essen.' },
+];
 
 // Basit şehirler listesi (Türkiye ve popüler dünya şehirleri örnek)
 const CITY_LIST = [
@@ -303,6 +382,10 @@ export default function HomeScreen() {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [currentCityName, setCurrentCityName] = useState('');
   const { location, errorMsg: locationError } = useCurrentLocation();
+  const [birthdays, setBirthdays] = useState<Birthday[]>([]);
+  useEffect(() => {
+    getBirthdays().then(setBirthdays);
+  }, []);
 
   // Favori şehirleri yükle
   useEffect(() => {
@@ -606,14 +689,36 @@ export default function HomeScreen() {
     }
   }, [location, city, lang]);
 
-  // Hata mesajı olarak konum hatasını da göster
-  if (!city && locationError) {
-    return <Text>{locationError}</Text>;
-  }
-  if (!city && !location) {
-    // Konum alınana kadar bekleme mesajı
-    return <ActivityIndicator />;
-  }
+  const [tipIndex, setTipIndex] = useState(() => Math.floor(Math.random() * healthTips.length));
+  useEffect(() => {
+    setTipIndex(Math.floor(Math.random() * healthTips.length));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lang]);
+
+  // Fonksiyon ve değişkenler JSX'ten önce tanımlanmalı:
+  const getWeatherWarningKey = (icon: string) => {
+    switch (icon) {
+      case 'clear-day': return 'clearDayWarning';
+      case 'clear-night': return 'clearNightWarning';
+      case 'cloudy': return 'cloudyWarning';
+      case 'drizzle': return 'drizzleWarning';
+      case 'mist': return 'mistWarning';
+      case 'partly-cloudy-day': return 'partlyCloudyDayWarning';
+      case 'partly-cloudy-night': return 'partlyCloudyNightWarning';
+      case 'rain': return 'rainWarning';
+      case 'snow': return 'snowWarning';
+      case 'thunder': return 'thunderWarning';
+      default: return null;
+    }
+  };
+
+  // Bugün doğum günü olan var mı?
+  const today = new Date();
+  const todayStr = today.toISOString().slice(5, 10); // MM-DD
+  const birthdayToday = birthdays.find(b => b.date.slice(5, 10) === todayStr);
+
+  // Sağlık önerisi metni
+  const healthTipText = (healthTips[tipIndex][lang] || healthTips[tipIndex].tr) as string;
 
   return (
     <LinearGradient
@@ -700,6 +805,14 @@ export default function HomeScreen() {
               </View>
             </View>
             {/* Ana hava durumu kartı */}
+            {birthdayToday && (
+              <View style={{backgroundColor: '#FFF3E0', borderRadius: 12, padding: 12, marginVertical: 10, alignItems: 'center', flexDirection: 'row', justifyContent: 'center'}}>
+                <MaterialCommunityIcons name="cake-variant" size={24} color="#ffb347" style={{ marginRight: 8 }} />
+                <Text style={{color: '#e65100', fontWeight: 'bold', fontSize: 16}}>
+                  {t('birthdayToday').replace('{name}', birthdayToday.name)}
+                </Text>
+              </View>
+            )}
             {weather && (
               <TouchableOpacity style={styles.favButton} onPress={() => toggleFavorite(turkceSehirAdi(weather.name))}>
                 <MaterialCommunityIcons name="star" size={28} color={favorites.includes(turkceSehirAdi(weather.name)) ? '#FFD700' : '#bbb'} />
@@ -742,7 +855,15 @@ export default function HomeScreen() {
                   <View style={styles.detailBox}>
                     <MaterialCommunityIcons name="thermometer" size={20} color="#b3c6f7" />
                     <Text style={styles.detailLabel}>{t('feelsLike')}</Text>
-                    <Text style={styles.detailValue}>{Math.round(weather.main.feels_like)}°C</Text>
+                    <Text
+                      style={[
+                        styles.detailValue,
+                        weather.main.feels_like >= 30 && { backgroundColor: '#ffb3b3', color: '#b71c1c', borderRadius: 8, paddingHorizontal: 8, paddingVertical: 2 },
+                        weather.main.feels_like <= 10 && { backgroundColor: '#b3d8ff', color: '#0d47a1', borderRadius: 8, paddingHorizontal: 8, paddingVertical: 2 }
+                      ]}
+                    >
+                      {Math.round(weather.main.feels_like)}°C
+                    </Text>
                   </View>
                   <View style={styles.detailBox}>
                     <MaterialCommunityIcons name="water-percent" size={20} color="#b3c6f7" />
@@ -774,16 +895,74 @@ export default function HomeScreen() {
                 </View>
               </View>
             )}
-            {/* 5 günlük tahmin */}
+            {/* --- SICAKLIK UYARI KUTUSU ve HAVA DURUMU UYARI KUTUSU: weather kartının ALTINDA --- */}
+            {weather && (
+              <>
+                {(weather.main.temp >= 30 || weather.main.temp <= 0) && (
+                  <View style={{backgroundColor: weather.main.temp >= 30 ? '#FFD700' : '#4FC3F7', padding: 12, borderRadius: 10, marginVertical: 10, alignItems: 'center'}}>
+                    <Text style={{color: '#222', fontWeight: 'bold', fontSize: 16}}>
+                      {weather.main.temp >= 30 ? t('hotWarning') : t('coldWarning')}
+                    </Text>
+                  </View>
+                )}
+                {(() => {
+                  let iconKey = '';
+                  switch (weather.weather[0].main.toLowerCase()) {
+                    case 'clear':
+                      iconKey = (new Date().getHours() >= 6 && new Date().getHours() < 20) ? 'clear-day' : 'clear-night';
+                      break;
+                    case 'clouds':
+                      iconKey = (new Date().getHours() >= 6 && new Date().getHours() < 20) ? 'partly-cloudy-day' : 'partly-cloudy-night';
+                      break;
+                    case 'drizzle':
+                      iconKey = 'drizzle';
+                      break;
+                    case 'rain':
+                      iconKey = 'rain';
+                      break;
+                    case 'snow':
+                      iconKey = 'snow';
+                      break;
+                    case 'thunderstorm':
+                      iconKey = 'thunder';
+                      break;
+                    case 'mist':
+                    case 'fog':
+                      iconKey = 'mist';
+                      break;
+                    default:
+                      iconKey = '';
+                  }
+                  const warningKey = getWeatherWarningKey(iconKey);
+                  return warningKey ? (
+                    <View style={{backgroundColor: '#FFF9C4', padding: 12, borderRadius: 10, marginVertical: 10, alignItems: 'center'}}>
+                      <Text style={{color: '#222', fontWeight: 'bold', fontSize: 16}}>
+                        {t(warningKey)}
+                      </Text>
+                    </View>
+                  ) : null;
+                })()}
+              </>
+            )}
+            {/* 5 günlük tahmin: tekrar uyarı kutularının ALTINA aldık */}
             {forecast && (
               <View style={styles.forecastContainer}>
                 <Text style={[styles.forecastTitle, isDark && styles.darkText]}>{t('forecast5')}</Text>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                   {getDailyForecast(forecast.list).map(item => {
                     const isNight = isForecastNight(item.dt);
+                    // Doğum günü kontrolü
+                    const forecastDate = new Date(item.dt_txt);
+                    const forecastStr = forecastDate.toISOString().slice(5, 10); // MM-DD
+                    const bday = birthdays.find(b => b.date.slice(5, 10) === forecastStr);
                     return (
                       <View style={styles.modernForecastItem} key={item.dt}>
-                        <Text style={styles.modernForecastDay}>{new Date(item.dt_txt).toLocaleDateString(lang === 'de' ? 'de-DE' : lang === 'ja' ? 'ja-JP' : lang === 'en' ? 'en-US' : 'tr-TR', { weekday: 'short', day: 'numeric', month: 'short' })}</Text>
+                        <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                          <Text style={styles.modernForecastDay}>{forecastDate.toLocaleDateString(lang === 'de' ? 'de-DE' : lang === 'ja' ? 'ja-JP' : lang === 'en' ? 'en-US' : 'tr-TR', { weekday: 'short', day: 'numeric', month: 'short' })}</Text>
+                          {bday && (
+                            <MaterialCommunityIcons name="cake-variant" size={18} color="#ffb347" style={{ marginLeft: 4 }} />
+                          )}
+                        </View>
                         <View style={getModernForecastIconStyle(isDark)}>
                           <LottieView
                             source={getWeatherLottie(item.weather[0].main, isNight)}
@@ -794,6 +973,11 @@ export default function HomeScreen() {
                         </View>
                         <Text style={styles.modernForecastTemp}>{Math.round(item.main.temp)}°C</Text>
                         <Text style={styles.modernForecastDesc} numberOfLines={2} ellipsizeMode="tail">{formatDescription(item.weather[0].description)}</Text>
+                        {bday && (
+                          <Text style={{ color: '#ff9800', fontWeight: 'bold', fontSize: 12, marginTop: 2 }}>
+                            {t('birthdaySoon').replace('{name}', bday.name)}
+                          </Text>
+                        )}
                       </View>
                     );
                   })}
@@ -847,6 +1031,14 @@ export default function HomeScreen() {
                 )}
               </View>
             )}
+            {/* --- SAĞLIK ÖNERİSİ --- */}
+            <View style={{marginTop: 24, marginBottom: 12, alignItems: 'center'}}>
+              <View style={{backgroundColor: isDark ? '#232a36' : '#e3f0ff', borderRadius: 12, padding: 12, maxWidth: 340}}>
+                <Text style={{color: isDark ? '#b3c6f7' : '#007AFF', fontWeight: 'bold', fontSize: 15, textAlign: 'center'}}>
+                  {healthTipText}
+                </Text>
+              </View>
+            </View>
           </ScrollView>
         </KeyboardAvoidingView>
       </SafeAreaView>
