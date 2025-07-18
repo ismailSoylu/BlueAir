@@ -10,7 +10,7 @@ import * as TaskManager from 'expo-task-manager';
 import LottieView from 'lottie-react-native';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { ActivityIndicator, Keyboard, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, ViewStyle } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useCurrentLocation } from '../../hooks/useCurrentLocation';
 import { Birthday, getBirthdays } from '../../services/birthdayService';
 import { ForecastData, ForecastItem, get5DayForecastByCity, get5DayForecastByLocation, getWeatherByCity, getWeatherByLocation, WeatherData } from '../../services/weatherService';
@@ -26,7 +26,7 @@ export const ThemeContext = createContext({
   setTheme: (val: 'light' | 'dark' | 'auto') => {},
 });
 
-type Lang = 'tr' | 'en' | 'ja' | 'de';
+type Lang = 'tr' | 'en' | 'ja' | 'de' | 'pt';
 export const LanguageContext = createContext<{
   lang: Lang;
   setLang: React.Dispatch<React.SetStateAction<Lang>>;
@@ -80,7 +80,7 @@ export const translations = {
     rainWarning: 'Şemsiyenizi almayı unutmayın!',
     snowWarning: 'Yollarda dikkatli olun, kaygan olabilir!',
     thunderWarning: 'Fırtınaya dikkat edin, güvende kalın!',
-    birthdayToday: 'Doğum günün kutlu olsun, {name}! 🎂',
+    birthdayToday: 'Doğum günün kutlu olsun, {name}! ��',
     birthdaySoon: 'Doğum günü yaklaşıyor! ({name})',
   },
   en: {
@@ -224,24 +224,72 @@ export const translations = {
     birthdayToday: 'Alles Gute zum Geburtstag, {name}! 🎂',
     birthdaySoon: 'Bald ist Geburtstag! ({name})',
   },
+  pt: {
+    weather: 'Tempo',
+    favorites: 'Favoritos',
+    searchPlaceholder: 'Digite o nome da cidade',
+    search: 'Buscar',
+    findByLocation: 'Encontrar por localização',
+    feelsLike: 'Sensação',
+    humidity: 'Umidade',
+    wind: 'Vento',
+    forecast5: 'Previsão de 5 dias',
+    forecast3h: 'Previsão de 3 horas',
+    errorNoCity: 'Por favor, insira o nome de uma cidade',
+    errorNoWeather: 'Não foi possível obter os dados do tempo',
+    errorNoLocation: 'Não foi possível obter o tempo pela localização',
+    errorNoPermission: 'Permissão de localização negada',
+    searchHelper: 'Você pode pesquisar por cidade, país ou região.',
+    tabHome: 'Início',
+    tabSettings: 'Configurações',
+    settingsTitle: 'Configurações',
+    language: 'Idioma',
+    theme: 'Tema',
+    light: 'Claro',
+    dark: 'Escuro',
+    auto: 'Automático',
+    info: 'No modo automático, o tema do sistema ou o horário (19:00-07:00) será escuro.',
+    loading: 'Carregando dados...',
+    noData: 'Sem dados',
+    districtNotFound: '{district} não encontrada, mostrando o tempo para {city}.',
+    pressure: 'Pressão',
+    sunrise: 'Nascer do sol',
+    sunset: 'Pôr do sol',
+    // --- AVISOS ---
+    hotWarning: 'Não se esqueça de beber bastante água e tenha cuidado com o sol!',
+    coldWarning: 'Está muito frio, vista-se bem e cuide da sua saúde!',
+    clearDayWarning: 'Céu limpo, aproveite o sol!',
+    clearNightWarning: 'Noite clara, tenha uma boa noite!',
+    cloudyWarning: 'Nublado, leve um casaco!',
+    drizzleWarning: 'Garoa, tenha cuidado!',
+    mistWarning: 'Baixa visibilidade, tenha cuidado!',
+    partlyCloudyDayWarning: 'Parcialmente nublado, o tempo pode mudar!',
+    partlyCloudyNightWarning: 'Noite parcialmente nublada, pode estar fresco!',
+    rainWarning: 'Não se esqueça do guarda-chuva!',
+    snowWarning: 'Cuidado, as ruas podem estar escorregadias!',
+    thunderWarning: 'Cuidado com tempestades, fique seguro!',
+    birthdayToday: 'Feliz aniversário, {name}! 🎂',
+    birthdaySoon: 'O aniversário está chegando! ({name})',
+  },
 };
 
 // Sağlık önerileri (tüm diller için tek dizi)
 const healthTips = [
-  { tr: 'Bol su için.', en: 'Drink plenty of water.', ja: 'たくさん水を飲みましょう。', de: 'Trinken Sie viel Wasser.' },
-  { tr: 'Her gün en az 5.000 adım atmaya çalışın.', en: 'Try to walk at least 5,000 steps every day.', ja: '毎日少なくとも5,000歩歩くようにしましょう。', de: 'Versuchen Sie, jeden Tag mindestens 5.000 Schritte zu gehen.' },
-  { tr: 'Düzenli egzersiz yapın.', en: 'Exercise regularly.', ja: '定期的に運動しましょう。', de: 'Machen Sie regelmäßig Sport.' },
-  { tr: 'Yeterince uyuyun.', en: 'Get enough sleep.', ja: '十分な睡眠をとりましょう。', de: 'Schlafen Sie ausreichend.' },
-  { tr: 'Dengeli beslenin.', en: 'Eat a balanced diet.', ja: 'バランスの良い食事をしましょう。', de: 'Ernähren Sie sich ausgewogen.' },
-  { tr: 'Güneşten korunun.', en: 'Protect yourself from the sun.', ja: '日差しに注意しましょう。', de: 'Schützen Sie sich vor der Sonne.' },
-  { tr: 'Ellerinizi sık sık yıkayın.', en: 'Wash your hands frequently.', ja: 'こまめに手を洗いましょう。', de: 'Waschen Sie häufig Ihre Hände.' },
-  { tr: 'Stresi azaltmaya çalışın.', en: 'Try to reduce stress.', ja: 'ストレスを減らすようにしましょう。', de: 'Versuchen Sie, Stress zu reduzieren.' },
-  { tr: 'Taze meyve ve sebze tüketin.', en: 'Eat fresh fruits and vegetables.', ja: '新鮮な果物と野菜を食べましょう。', de: 'Essen Sie frisches Obst und Gemüse.' },
-  { tr: 'Açık havada zaman geçirin.', en: 'Spend time outdoors.', ja: '外で過ごす時間を作りましょう。', de: 'Verbringen Sie Zeit im Freien.' },
-  { tr: 'Düzenli sağlık kontrolleri yaptırın.', en: 'Get regular health check-ups.', ja: '定期的に健康診断を受けましょう。', de: 'Lassen Sie regelmäßig Gesundheitschecks machen.' },
-  { tr: 'Kemik sağlığınız için D vitamini alın.', en: 'Get vitamin D for bone health.', ja: '骨の健康のためにビタミンDを摂りましょう。', de: 'Nehmen Sie Vitamin D für die Knochengesundheit.' },
-  { tr: 'Sosyal aktivitelere katılın.', en: 'Join social activities.', ja: '社会活動に参加しましょう。', de: 'Nehmen Sie an sozialen Aktivitäten teil.' },
-  { tr: 'Sebze ve meyve yemeyi unutmayın.', en: 'Don\'t forget to eat fruits and vegetables.', ja: '果物と野菜を食べるのを忘れずに。', de: 'Vergessen Sie nicht, Obst und Gemüse zu essen.' },
+  { tr: 'Bol su için.', en: 'Drink plenty of water.', ja: 'たくさん水を飲みましょう。', de: 'Trinken Sie viel Wasser.', pt: 'Beba bastante água.' },
+  { tr: 'Her gün en az 5.000 adım atmaya çalışın.', en: 'Try to walk at least 5,000 steps every day.', ja: '毎日少なくとも5,000歩歩くようにしましょう。', de: 'Versuchen Sie, jeden Tag mindestens 5.000 Schritte zu gehen.', pt: 'Tente caminhar pelo menos 5.000 passos todos os dias.' },
+  { tr: 'Düzenli egzersiz yapın.', en: 'Exercise regularly.', ja: '定期的に運動しましょう。', de: 'Machen Sie regelmäßig Sport.', pt: 'Exercite-se regularmente.' },
+  { tr: 'Yeterince uyuyun.', en: 'Get enough sleep.', ja: '十分な睡眠をとりましょう。', de: 'Schlafen Sie ausreichend.', pt: 'Durma o suficiente.' },
+  { tr: 'Dengeli beslenin.', en: 'Eat a balanced diet.', ja: 'バランスの良い食事をしましょう。', de: 'Ernähren Sie sich ausgewogen.', pt: 'Tenha uma alimentação equilibrada.' },
+  { tr: 'Güneşten korunun.', en: 'Protect yourself from the sun.', ja: '日差しに注意しましょう。', de: 'Schützen Sie sich vor der Sonne.', pt: 'Proteja-se do sol.' },
+  { tr: 'Ellerinizi sık sık yıkayın.', en: 'Wash your hands frequently.', ja: 'こまめに手を洗いましょう。', de: 'Waschen Sie häufig Ihre Hände.', pt: 'Lave as mãos com frequência.' },
+  { tr: 'Stresi azaltmaya çalışın.', en: 'Try to reduce stress.', ja: 'ストレスを減らすようにしましょう。', de: 'Versuchen Sie, Stress zu reduzieren.', pt: 'Tente reduzir o estresse.' },
+  { tr: 'Taze meyve ve sebze tüketin.', en: 'Eat fresh fruits and vegetables.', ja: '新鮮な果物と野菜を食べましょう。', de: 'Essen Sie frisches Obst und Gemüse.', pt: 'Coma frutas e vegetais frescos.' },
+  { tr: 'Açık havada zaman geçirin.', en: 'Spend time outdoors.', ja: '外で過ごす時間を作りましょう。', de: 'Verbringen Sie Zeit im Freien.', pt: 'Passe tempo ao ar livre.' },
+  { tr: 'Düzenli sağlık kontrolleri yaptırın.', en: 'Get regular health check-ups.', ja: '定期的に健康診断を受けましょう。', de: 'Lassen Sie regelmäßig Gesundheitschecks machen.', pt: 'Faça exames de saúde regularmente.' },
+  { tr: 'Kemik sağlığınız için D vitamini alın.', en: 'Get vitamin D for bone health.', ja: '骨の健康のためにビタミンDを摂りましょう。', de: 'Nehmen Sie Vitamin D für die Knochengesundheit.', pt: 'Tome vitamina D para a saúde dos ossos.' },
+  { tr: 'Sosyal aktivitelere katılın.', en: 'Join social activities.', ja: '社会活動に参加しましょう。', de: 'Nehmen Sie an sozialen Aktivitäten teil.', pt: 'Participe de atividades sociais.' },
+  { tr: 'Her gün oyun oynayın ve hareket edin.', en: 'Play and move every day.', ja: '毎日遊んで体を動かしましょう。', de: 'Spielen und bewegen Sie sich jeden Tag.', pt: 'Brinque e movimente-se todos os dias.' },
+  { tr: 'Sebze ve meyve yemeyi unutmayın.', en: 'Don\'t forget to eat fruits and vegetables.', ja: '果物と野菜を食べるのを忘れずに。', de: 'Vergessen Sie nicht, Obst und Gemüse zu essen.', pt: 'Não se esqueça de comer frutas e vegetais.' },
 ];
 
 // Basit şehirler listesi (Türkiye ve popüler dünya şehirleri örnek)
@@ -370,6 +418,7 @@ const getWeatherLottie = (weatherMain: string, isNight: boolean) => {
 export default function HomeScreen() {
   const { theme, isDark } = useContext(ThemeContext);
   const { lang, setLang } = useContext(LanguageContext);
+  const insets = useSafeAreaInsets();
   const t = (key: keyof typeof translations['tr']) => translations[lang as Lang][key];
   const [city, setCity] = useState('');
   const [weather, setWeather] = useState<WeatherData | null>(null);
@@ -737,8 +786,15 @@ export default function HomeScreen() {
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 24}
         >
+          {/* StatusBar ve arka plan rengi için View */}
+          <StatusBar style={isDark ? 'light' : 'dark'} />
+          <View style={{
+            height: insets.top,
+            backgroundColor: isDark ? '#232a36' : '#b3c6f7',
+            position: 'absolute',
+            top: 0, left: 0, right: 0, zIndex: 1
+          }} />
           <ScrollView contentContainerStyle={{ paddingBottom: 40, paddingHorizontal: 8 }} showsVerticalScrollIndicator={false}>
-            <StatusBar style={isDark ? 'light' : 'dark'} />
             <Text style={[styles.title, isDark && styles.darkText]}>{t('weather')}</Text>
             <Text style={{textAlign: 'center', fontSize: 15, color: isDark ? '#fff' : '#222', marginBottom: 4}}>
               {currentTime.toLocaleTimeString()}
@@ -964,7 +1020,7 @@ export default function HomeScreen() {
                     return (
                       <View style={styles.modernForecastItem} key={item.dt}>
                         <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                          <Text style={styles.modernForecastDay}>{forecastDate.toLocaleDateString(lang === 'de' ? 'de-DE' : lang === 'ja' ? 'ja-JP' : lang === 'en' ? 'en-US' : 'tr-TR', { weekday: 'short', day: 'numeric', month: 'short' })}</Text>
+                          <Text style={styles.modernForecastDay}>{forecastDate.toLocaleDateString(lang === 'de' ? 'de-DE' : lang === 'ja' ? 'ja-JP' : lang === 'en' ? 'en-US' : lang === 'pt' ? 'pt-PT' : 'tr-TR', { weekday: 'short', day: 'numeric', month: 'short' })}</Text>
                           {bday && (
                             <MaterialCommunityIcons name="cake-variant" size={18} color="#ffb347" style={{ marginLeft: 4 }} />
                           )}
@@ -1045,6 +1101,8 @@ export default function HomeScreen() {
                 </Text>
               </View>
             </View>
+            {/* Alt navigation bar/safe area için arka plan rengi */}
+            {/* Alt çizgi oluşturan View'u kaldırıyorum */}
           </ScrollView>
         </KeyboardAvoidingView>
       </SafeAreaView>

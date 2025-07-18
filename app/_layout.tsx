@@ -11,7 +11,7 @@ import 'react-native-reanimated';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { LanguageContext, ThemeContext } from './(tabs)/home';
 
-type Lang = 'tr' | 'en' | 'ja' | 'de';
+type Lang = 'tr' | 'en' | 'ja' | 'de'| 'pt';
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -86,7 +86,7 @@ export default function RootLayout() {
             </Stack>
 
             {/* ✅ StatusBar edge-to-edge uyumlu */}
-            <StatusBar style="light" translucent backgroundColor="transparent" />
+            <StatusBar style="light" translucent />
           </ThemeProvider>
         </ThemeContext.Provider>
       </LanguageContext.Provider>

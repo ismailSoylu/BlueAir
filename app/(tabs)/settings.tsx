@@ -173,6 +173,45 @@ export const translations: Record<string, Record<string, string>> = {
     birthdayAddError: 'Bitte Name und Datum eingeben',
     daysLeft: 'Noch {days} Tage',
   },
+  pt: {
+    weather: 'Tempo',
+    favorites: 'Favoritos',
+    searchPlaceholder: 'Digite o nome da cidade',
+    search: 'Buscar',
+    findByLocation: 'Encontrar por Localização',
+    feelsLike: 'Sensação',
+    humidity: 'Umidade',
+    wind: 'Vento',
+    forecast5: 'Previsão de 5 dias',
+    forecast3h: 'Previsão de 3 horas',
+    errorNoCity: 'Por favor, digite o nome da cidade',
+    errorNoWeather: 'Não foi possível obter os dados do tempo',
+    errorNoLocation: 'Não foi possível obter o tempo por localização',
+    errorNoPermission: 'Permissão de localização negada',
+    searchHelper: 'Você pode procurar por cidade, país ou região.',
+    tabHome: 'Início',
+    tabSettings: 'Configurações',
+    settingsTitle: 'Configurações',
+    language: 'Idioma',
+    theme: 'Tema',
+    light: 'Claro',
+    dark: 'Escuro',
+    auto: 'Automático',
+    info: 'No modo automático, o tema do sistema ou a hora (19:00-07:00) será escuro.',
+    loading: 'Carregando dados...',
+    noData: 'Sem dados',
+    districtNotFound: '{district} não encontrado, mostrando tempo para {city}.',
+    pressure: 'Pressão',
+    sunrise: 'Nascer do Sol',
+    sunset: 'Pôr do Sol',
+    rateUs: 'Gostaria de nos apoiar? Se você gostou do aplicativo, pode nos dar 5 estrelas!',
+    rateButton: 'Avaliar 5 Estrelas',
+    birthdayAddTitle: 'Adicionar Aniversário',
+    birthdayNamePlaceholder: 'Nome',
+    birthdayDatePlaceholder: 'Data',
+    birthdayAddError: 'Por favor, digite um nome e uma data',
+    daysLeft: 'Faltam {days} dias',
+  },
 };
 
 // Doğum gününe kaç gün kaldığını hesaplayan fonksiyon
@@ -329,6 +368,9 @@ export default function SettingsScreen() {
                 </TouchableOpacity>
                 <TouchableOpacity style={[styles.themeBtn, lang === 'de' && styles.selectedBtn]} onPress={() => setLang('de')}>
                   <Text style={[styles.themeBtnText, lang === 'de' && styles.selectedBtnText]}>Deutsch</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={[styles.themeBtn, lang === 'pt' && styles.selectedBtn]} onPress={() => setLang('pt')}>
+                  <Text style={[styles.themeBtnText, lang === 'pt' && styles.selectedBtnText]}>Português</Text>
                 </TouchableOpacity>
               </View>
             </View>
