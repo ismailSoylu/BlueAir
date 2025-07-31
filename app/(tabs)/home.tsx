@@ -9,11 +9,81 @@ import { StatusBar } from 'expo-status-bar';
 import * as TaskManager from 'expo-task-manager';
 import LottieView from 'lottie-react-native';
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { ActivityIndicator, Keyboard, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, ViewStyle } from 'react-native';
+import { ActivityIndicator, Keyboard, KeyboardAvoidingView, Platform, ScrollView, Share, StyleSheet, Text, TextInput, TouchableOpacity, View, ViewStyle } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useCurrentLocation } from '../../hooks/useCurrentLocation';
 import { Birthday, getBirthdays } from '../../services/birthdayService';
 import { ForecastData, ForecastItem, get5DayForecastByCity, get5DayForecastByLocation, getWeatherByCity, getWeatherByLocation, WeatherData } from '../../services/weatherService';
+
+// Şehir adını Türkçeleştiren yardımcı fonksiyon (paylaşım için gereklidir)
+function turkceSehirAdi(name: string) {
+  name = name.trim();
+  const map: Record<string, string> = {
+    'Istanbul': 'İstanbul',
+    'Izmir': 'İzmir',
+    'Canakkale': 'Çanakkale',
+    'Eskisehir': 'Eskişehir',
+    'Sanliurfa': 'Şanlıurfa',
+    'Sivas': 'Sivas',
+    'Usak': 'Uşak',
+    'Cankiri': 'Çankırı',
+    'Corum': 'Çorum',
+    'Gumushane': 'Gümüşhane',
+    'Kutahya': 'Kütahya',
+    'Mugla': 'Muğla',
+    'Nevsehir': 'Nevşehir',
+    'Sirnak': 'Şırnak',
+    'Tekirdag': 'Tekirdağ',
+    'Zonguldak': 'Zonguldak',
+    'Siliviri': 'Silivri',
+    'Rome': 'Roma',
+    // ... gerekirse ekle ...
+  };
+  return map[name] || name;
+}
+
+// Açıklamadaki her kelimenin ilk harfini büyüt (paylaşım için gereklidir)
+function formatDescription(s: string) {
+  return s.split(' ').map(word =>
+    word.length > 0
+      ? word[0].toLocaleUpperCase('tr-TR') + word.slice(1).toLocaleLowerCase('tr-TR')
+      : ''
+  ).join(' ');
+}
+
+// Hava durumu paylaşım mesajı oluşturucu
+const getShareMessage = (weatherData: WeatherData | null, lang: Lang): string => {
+  if (!weatherData) return '';
+  const city = turkceSehirAdi(weatherData?.name || '');
+  const temp = weatherData?.main?.temp ? `${Math.round(weatherData.main.temp)}°C` : '-';
+  const description = formatDescription(weatherData?.weather?.[0]?.description || '');
+  const humidity = weatherData?.main?.humidity ? `%${weatherData.main.humidity}` : '-';
+  const wind = weatherData?.wind?.speed ? `${(weatherData.wind.speed * 3.6).toFixed(1)} km/sa` : '-';
+  const pressure = weatherData?.main?.pressure ? `${weatherData.main.pressure} hPa` : '-';
+  const sunrise = weatherData?.sys?.sunrise ? new Date(weatherData.sys.sunrise * 1000).toLocaleTimeString(lang === 'de' ? 'de-DE' : lang === 'ja' ? 'ja-JP' : lang === 'en' ? 'en-US' : lang === 'pt' ? 'pt-PT' : 'tr-TR', { hour: '2-digit', minute: '2-digit' }) : '-';
+  const sunset = weatherData?.sys?.sunset ? new Date(weatherData.sys.sunset * 1000).toLocaleTimeString(lang === 'de' ? 'de-DE' : lang === 'ja' ? 'ja-JP' : lang === 'en' ? 'en-US' : lang === 'pt' ? 'pt-PT' : 'tr-TR', { hour: '2-digit', minute: '2-digit' }) : '-';
+  const appLink = 'https://play.google.com/store/apps/details?id=com.ismailjacob.blueAir';
+
+  const shareTexts: Record<Lang, string> = {
+    tr: `${city} için güncel hava durumu:\n\n🌡️ Sıcaklık: ${temp}\n🌤️ Durum: ${description}\n💧 Nem: ${humidity}\n💨 Rüzgar: ${wind}\n🧭 Basınç: ${pressure}\n🌅 G.Doğumu: ${sunrise}\n🌇 G.Batımı: ${sunset}\n\nBlueAir ile paylaşıldı!\nUygulamayı indir: ${appLink}`,
+    en: `Current weather in ${city}:\n\n🌡️ Temperature: ${temp}\n🌤️ Condition: ${description}\n💧 Humidity: ${humidity}\n💨 Wind: ${wind}\n🧭 Pressure: ${pressure}\n🌅 Sunrise: ${sunrise}\n🌇 Sunset: ${sunset}\n\nShared via BlueAir!\nDownload the app: ${appLink}`,
+    de: `Aktuelles Wetter in ${city}:\n\n🌡️ Temperatur: ${temp}\n🌤️ Wetter: ${description}\n💧 Luftfeuchtigkeit: ${humidity}\n💨 Wind: ${wind}\n🧭 Luftdruck: ${pressure}\n🌅 Sonnenaufgang: ${sunrise}\n🌇 Sonnenuntergang: ${sunset}\n\nGeteilt mit BlueAir!\nApp herunterladen: ${appLink}`,
+    ja: `${city}の現在の天気:\n\n🌡️ 気温: ${temp}\n🌤️ 天気: ${description}\n💧 湿度: ${humidity}\n💨 風: ${wind}\n🧭 気圧: ${pressure}\n🌅 日の出: ${sunrise}\n🌇 日の入り: ${sunset}\n\nBlueAirでシェアしました！\nアプリをダウンロード: ${appLink}`,
+    pt: `Tempo atual em ${city}:\n\n🌡️ Temperatura: ${temp}\n🌤️ Condição: ${description}\n💧 Umidade: ${humidity}\n💨 Vento: ${wind}\n🧭 Pressão: ${pressure}\n🌅 Nascer do sol: ${sunrise}\n🌇 Pôr do sol: ${sunset}\n\nCompartilhado via BlueAir!\nBaixe o app: ${appLink}`
+  };
+  return shareTexts[lang] || shareTexts.en;
+};
+
+const getShareButtonLabel = (lang: Lang): string => {
+  switch(lang) {
+    case 'tr': return "Hava Durumunu Paylaş";
+    case 'en': return "Share Weather";
+    case 'de': return "Wetter teilen";
+    case 'ja': return "天気をシェア";
+    case 'pt': return "Compartilhar Tempo";
+    default: return "Share Weather";
+  }
+};
 
 const THEME_KEY = 'APP_THEME';
 const RECENT_CITIES_KEY = 'RECENT_CITIES';
@@ -747,7 +817,7 @@ export default function HomeScreen() {
   const [tipIndex, setTipIndex] = useState(() => Math.floor(Math.random() * healthTips.length));
   useEffect(() => {
     setTipIndex(Math.floor(Math.random() * healthTips.length));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [lang]);
 
   // Fonksiyon ve değişkenler JSX'ten önce tanımlanmalı:
@@ -886,79 +956,109 @@ export default function HomeScreen() {
               <Text style={[styles.error, isDark && styles.darkText]} allowFontScaling numberOfLines={2} adjustsFontSizeToFit>{error}</Text>
             )}
             {weather && (
-              <View style={styles.weatherCard}>
-                <Text style={styles.cityName} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>{turkceSehirAdi(weather.name)}</Text>
-                <View style={styles.tempRow}>
-                  <View style={[getModernForecastIconStyle(isDark), { marginRight: 20, backgroundColor: 'transparent', shadowColor: 'transparent' }]}> 
-                    {(() => {
-                      const now = Date.now() / 1000;
-                      const isNightNow = now < weather.sys.sunrise || now > weather.sys.sunset;
-                      return (
-                        <LottieView
-                          source={getWeatherLottie(weather.weather[0].main, isNightNow)}
-                          autoPlay
-                          loop
-                          style={{ width: 72, height: 72 }}
-                        />
-                      );
-                    })()}
+              <>
+                <View style={styles.weatherCard}>
+                  <Text style={styles.cityName} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>{turkceSehirAdi(weather.name)}</Text>
+                  <View style={styles.tempRow}>
+                    <View style={[getModernForecastIconStyle(isDark), { marginRight: 20, backgroundColor: 'transparent', shadowColor: 'transparent' }]}> 
+                      {(() => {
+                        const now = Date.now() / 1000;
+                        const isNightNow = now < weather.sys.sunrise || now > weather.sys.sunset;
+                        return (
+                          <LottieView
+                            source={getWeatherLottie(weather.weather[0].main, isNightNow)}
+                            autoPlay
+                            loop
+                            style={{ width: 72, height: 72 }}
+                          />
+                        );
+                      })()}
+                    </View>
+                    <View>
+                      <Text style={styles.temperature} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>{Math.round(weather.main.temp)}°C</Text>
+                      <Text
+                        style={[styles.description, { maxWidth: 120, flexShrink: 1 }]}
+                        numberOfLines={2}
+                        ellipsizeMode="tail"
+                        allowFontScaling adjustsFontSizeToFit
+                      >
+                        {formatDescription(weather.weather[0].description)}
+                      </Text>
+                    </View>
                   </View>
-                  <View>
-                    <Text style={styles.temperature} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>{Math.round(weather.main.temp)}°C</Text>
-                    <Text
-                      style={[styles.description, { maxWidth: 120, flexShrink: 1 }]}
-                      numberOfLines={2}
-                      ellipsizeMode="tail"
-                      allowFontScaling adjustsFontSizeToFit
-                    >
-                      {formatDescription(weather.weather[0].description)}
+                  <View style={styles.detailsRow}>
+                    <View style={styles.detailBox}>
+                      <MaterialCommunityIcons name="thermometer" size={20} color="#b3c6f7" />
+                      <Text style={styles.detailLabel} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>{t('feelsLike')}</Text>
+                      <Text
+                        style={[
+                          styles.detailValue,
+                          weather.main.feels_like >= 30 && { backgroundColor: '#ffb3b3', color: '#b71c1c', borderRadius: 8, paddingHorizontal: 8, paddingVertical: 2 },
+                          weather.main.feels_like <= 10 && { backgroundColor: '#b3d8ff', color: '#0d47a1', borderRadius: 8, paddingHorizontal: 8, paddingVertical: 2 }
+                        ]}
+                        allowFontScaling adjustsFontSizeToFit
+                      >
+                        {Math.round(weather.main.feels_like)}°C
+                      </Text>
+                    </View>
+                    <View style={styles.detailBox}>
+                      <MaterialCommunityIcons name="water-percent" size={20} color="#b3c6f7" />
+                      <Text style={styles.detailLabel} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>{t('humidity')}</Text>
+                      <Text style={styles.detailValue} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>%{weather.main.humidity}</Text>
+                    </View>
+                    <View style={styles.detailBox}>
+                      <MaterialCommunityIcons name="weather-windy" size={20} color="#b3c6f7" />
+                      <Text style={styles.detailLabel} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>{t('wind')}</Text>
+                      <Text style={styles.detailValue} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>{(weather.wind.speed * 3.6).toFixed(1)} km/sa</Text>
+                    </View>
+                  </View>
+                  <View style={styles.detailsRow}>
+                    <View style={styles.detailBox}>
+                      <MaterialCommunityIcons name="gauge" size={20} color="#b3c6f7" />
+                      <Text style={styles.detailLabel} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>{t('pressure')}</Text>
+                      <Text style={styles.detailValue} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>{weather.main.pressure} hPa</Text>
+                    </View>
+                    <View style={styles.detailBox}>
+                      <MaterialCommunityIcons name="weather-sunset-up" size={20} color="#b3c6f7" />
+                      <Text style={styles.detailLabel} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>{t('sunrise')}</Text>
+                      <Text style={styles.detailValue} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>{new Date(weather.sys.sunrise * 1000).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}</Text>
+                    </View>
+                    <View style={styles.detailBox}>
+                      <MaterialCommunityIcons name="weather-sunset-down" size={20} color="#b3c6f7" />
+                      <Text style={styles.detailLabel} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>{t('sunset')}</Text>
+                      <Text style={styles.detailValue} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>{new Date(weather.sys.sunset * 1000).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}</Text>
+                    </View>
+                  </View>
+                </View>
+                {/* Paylaş butonu */}
+                <View style={{ alignItems: 'center', marginTop: 16 }}>
+                  <TouchableOpacity
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      backgroundColor: '#3b82f6',
+                      paddingVertical: 10,
+                      paddingHorizontal: 22,
+                      borderRadius: 24,
+                      shadowColor: '#000',
+                      shadowOpacity: 0.07,
+                      shadowRadius: 5,
+                      elevation: 3,
+                      marginBottom: 8,
+                    }}
+                    onPress={() => {
+                      const message = getShareMessage(weather, lang);
+                      if (message) Share.share({ message });
+                    }}
+                    activeOpacity={0.85}
+                  >
+                    <MaterialCommunityIcons name="share-variant" size={22} color="#fff" style={{ marginRight: 8 }} />
+                    <Text style={{ color: '#fff', fontSize: 16, fontWeight: "600" }}>
+                      {getShareButtonLabel(lang)}
                     </Text>
-                  </View>
+                  </TouchableOpacity>
                 </View>
-                <View style={styles.detailsRow}>
-                  <View style={styles.detailBox}>
-                    <MaterialCommunityIcons name="thermometer" size={20} color="#b3c6f7" />
-                    <Text style={styles.detailLabel} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>{t('feelsLike')}</Text>
-                    <Text
-                      style={[
-                        styles.detailValue,
-                        weather.main.feels_like >= 30 && { backgroundColor: '#ffb3b3', color: '#b71c1c', borderRadius: 8, paddingHorizontal: 8, paddingVertical: 2 },
-                        weather.main.feels_like <= 10 && { backgroundColor: '#b3d8ff', color: '#0d47a1', borderRadius: 8, paddingHorizontal: 8, paddingVertical: 2 }
-                      ]}
-                      allowFontScaling adjustsFontSizeToFit
-                    >
-                      {Math.round(weather.main.feels_like)}°C
-                    </Text>
-                  </View>
-                  <View style={styles.detailBox}>
-                    <MaterialCommunityIcons name="water-percent" size={20} color="#b3c6f7" />
-                    <Text style={styles.detailLabel} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>{t('humidity')}</Text>
-                    <Text style={styles.detailValue} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>%{weather.main.humidity}</Text>
-                  </View>
-                  <View style={styles.detailBox}>
-                    <MaterialCommunityIcons name="weather-windy" size={20} color="#b3c6f7" />
-                    <Text style={styles.detailLabel} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>{t('wind')}</Text>
-                    <Text style={styles.detailValue} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>{(weather.wind.speed * 3.6).toFixed(1)} km/sa</Text>
-                  </View>
-                </View>
-                <View style={styles.detailsRow}>
-                  <View style={styles.detailBox}>
-                    <MaterialCommunityIcons name="gauge" size={20} color="#b3c6f7" />
-                    <Text style={styles.detailLabel} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>{t('pressure')}</Text>
-                    <Text style={styles.detailValue} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>{weather.main.pressure} hPa</Text>
-                  </View>
-                  <View style={styles.detailBox}>
-                    <MaterialCommunityIcons name="weather-sunset-up" size={20} color="#b3c6f7" />
-                    <Text style={styles.detailLabel} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>{t('sunrise')}</Text>
-                    <Text style={styles.detailValue} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>{new Date(weather.sys.sunrise * 1000).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}</Text>
-                  </View>
-                  <View style={styles.detailBox}>
-                    <MaterialCommunityIcons name="weather-sunset-down" size={20} color="#b3c6f7" />
-                    <Text style={styles.detailLabel} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>{t('sunset')}</Text>
-                    <Text style={styles.detailValue} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>{new Date(weather.sys.sunset * 1000).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}</Text>
-                  </View>
-                </View>
-              </View>
+              </>
             )}
             {/* --- SICAKLIK UYARI KUTUSU ve HAVA DURUMU UYARI KUTUSU: weather kartının ALTINDA --- */}
             {weather && (
