@@ -32,6 +32,14 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="game"
+        options={{
+          title: t('tabGame'),
+          tabBarLabel: t('tabGame'),
+          tabBarIcon: ({ color, size }) => <Ionicons name="game-controller" color={color} size={size} />,
+        }}
+      />
+      <Tabs.Screen
         name="settings"
         options={{
           title: t('tabSettings'),

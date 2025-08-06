@@ -1,8 +1,11 @@
 import axios from 'axios';
 import Constants from 'expo-constants';
 
-const API_KEY = Constants.expoConfig?.extra?.openWeatherApiKey;
+// Hem expo constants hem de process.env'den API anahtarını dene
+const API_KEY = Constants.expoConfig?.extra?.openWeatherApiKey || process.env.OPEN_WEATHER_API_KEY;
 const BASE_URL = 'https://api.openweathermap.org/data/2.5';
+
+console.log('API Key loaded:', API_KEY ? 'YES' : 'NO');
 
 export interface WeatherData {
   main: {
@@ -11,11 +14,11 @@ export interface WeatherData {
     humidity: number;
     pressure: number;
   };
-  weather: Array<{
+  weather: {
     main: string;
     description: string;
     icon: string;
-  }>;
+  }[];
   wind: {
     speed: number;
   };
@@ -34,11 +37,11 @@ export interface ForecastItem {
     humidity: number;
     pressure: number;
   };
-  weather: Array<{
+  weather: {
     main: string;
     description: string;
     icon: string;
-  }>;
+  }[];
   wind: {
     speed: number;
   };
@@ -92,7 +95,7 @@ export const getWeatherByCity = async (city: string, lang: string = 'tr'): Promi
       }
     });
     return response.data;
-  } catch (error) {
+  } catch {
     // İlçe bulunamazsa büyükşehir için tekrar dene
     if (city !== normalizedCity) {
       try {
@@ -105,7 +108,7 @@ export const getWeatherByCity = async (city: string, lang: string = 'tr'): Promi
           }
         });
         return response.data;
-      } catch (retryError) {
+      } catch {
         throw new Error('Hava durumu bilgisi alınamadı');
       }
     }
@@ -125,7 +128,7 @@ export const getWeatherByLocation = async (lat: number, lon: number, lang: strin
       }
     });
     return response.data;
-  } catch (error) {
+  } catch {
     throw new Error('Hava durumu bilgisi alınamadı');
   }
 };
@@ -149,7 +152,7 @@ export const get5DayForecastByCity = async (city: string, lang: string = 'tr'): 
       },
     });
     return response.data;
-  } catch (error) {
+  } catch {
     throw new Error('Tahmin verisi alınamadı');
   }
 };
@@ -166,7 +169,7 @@ export const get5DayForecastByLocation = async (lat: number, lon: number, lang: 
       },
     });
     return response.data;
-  } catch (error) {
+  } catch {
     throw new Error('Tahmin verisi alınamadı');
   }
 };

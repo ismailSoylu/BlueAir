@@ -21,6 +21,7 @@ Users can view real-time weather updates and 5-day forecasts based on city names
 - 🧾 3-hour and 5-day forecast support
 - 🎞️ Animated weather icons using Lottie
 - 🔐 Secure API key usage via `.env` file
+- 🎮 Mini game: Flappy Bird style game for entertainment
 
 ---
 

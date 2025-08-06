@@ -5,7 +5,7 @@ export default {
     name: "Blue Air",
     displayName: "Blue Air",
     slug: "blueAir",
-    version: "1.0.8",
+    version: "1.0.9",
     orientation: "default",
     icon: "./assets/images/icon.png",
     scheme: "blueair",
@@ -43,7 +43,7 @@ export default {
       },
 
       package: "com.ismailjacob.blueAir",
-      versionCode: 13,
+      versionCode: 14,
 
       allowBackup: true,
       softwareKeyboardLayoutMode: "pan",

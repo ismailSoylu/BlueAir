@@ -8,7 +8,7 @@ import * as Notifications from 'expo-notifications';
 import { StatusBar } from 'expo-status-bar';
 import * as TaskManager from 'expo-task-manager';
 import LottieView from 'lottie-react-native';
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { ActivityIndicator, Keyboard, KeyboardAvoidingView, Platform, ScrollView, Share, StyleSheet, Text, TextInput, TouchableOpacity, View, ViewStyle } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useCurrentLocation } from '../../hooks/useCurrentLocation';
@@ -85,7 +85,6 @@ const getShareButtonLabel = (lang: Lang): string => {
   }
 };
 
-const THEME_KEY = 'APP_THEME';
 const RECENT_CITIES_KEY = 'RECENT_CITIES';
 const WEATHER_TASK = 'background-weather-task';
 
@@ -123,6 +122,7 @@ export const translations = {
     errorNoPermission: 'Konum izni verilmedi',
     searchHelper: 'Şehir, ülke veya bölge adı arayabilirsiniz.',
     tabHome: 'Anasayfa',
+    tabGame: 'Oyun',
     tabSettings: 'Ayarlar',
     settingsTitle: 'Ayarlar',
     language: 'Dil',
@@ -152,6 +152,49 @@ export const translations = {
     thunderWarning: 'Fırtınaya dikkat edin, güvende kalın!',
     birthdayToday: 'Doğum günün kutlu olsun, {name}! 🎂',
     birthdaySoon: 'Doğum günü yaklaşıyor! ({name})',
+    // --- OYUN METİNLERİ ---
+    gameTitle: 'Şemsiye Yağmur Oyunu',
+    gameNormal: 'Normal',
+    gameBonus: 'Bonus',
+    gameDanger: 'Tehlike',
+    gameScore: 'Puan',
+    gameBest: 'En İyi',
+    gameOver: 'Oyun Bitti',
+    gameStart: 'Oyunu Başlat!',
+    gameRestart: 'Yeniden başlamak için dokun',
+    gameInstructions: 'Yağmur damlaları düştüğünde\nşemsiye açmak için dokun!',
+    gameDropTypes: 'Mavi = Normal (+1)\nAltın = Bonus (+3)\nKırmızı = Tehlike (+5 ama riskli!)',
+    gameRisk: 'ama riskli!',
+    // --- MAĞAZA METİNLERİ ---
+    shop: 'Mağaza',
+    shopTitle: 'MAĞAZA',
+    shopCoins: 'puan',
+    shopCharacters: 'Karakterler:',
+    shopUmbrellas: 'Şemsiyeler:',
+    shopClose: 'Kapat',
+    shopDefaultCharacter: 'Varsayılan Karakter',
+    shopNewCharacter: 'Yeni Karakter',
+    shopWomanCharacter: 'Kadın Karakter',
+    shopBusinessman: 'İş Adamı',
+    shopStudent: 'Öğrenci',
+    shopAstronaut: 'Astronot',
+    shopDefaultUmbrella: 'Varsayılan Şemsiye',
+    shopPurpleUmbrella: 'Mor Şemsiye',
+    shopRainUmbrella: 'Yağmur Şemsiyesi',
+    shopBeachUmbrella: 'Plaj Şemsiyesi',
+    shopSunUmbrella: 'Güneş Şemsiyesi',
+    shopGreenUmbrella: 'Yeşil Şemsiye',
+    shopRedUmbrella: 'Kırmızı Şemsiye',
+    shopInsufficientFunds: 'Yetersiz Para!',
+    shopInsufficientMessage: 'Bu öğeyi satın almak için yeterli paranız yok.',
+    shopResetGame: 'Oyunu Sıfırla',
+    shopResetConfirm: 'Tüm ilerleme sıfırlanacak. Emin misiniz?',
+    shopResetSuccess: 'Oyun başarıyla sıfırlandı!',
+    shopOkButton: 'Tamam',
+    shopYesButton: 'Evet',
+    shopNoButton: 'Hayır',
+    shopSelected: 'Seçili',
+    shopSelect: 'Seç',
   },
   en: {
     weather: 'Weather',
@@ -170,6 +213,7 @@ export const translations = {
     errorNoPermission: 'Location permission denied',
     searchHelper: 'You can search for a city, country, or region.',
     tabHome: 'Home',
+    tabGame: 'Game',
     tabSettings: 'Settings',
     settingsTitle: 'Settings',
     language: 'Language',
@@ -199,6 +243,49 @@ export const translations = {
     thunderWarning: 'Beware of thunderstorms, stay safe!',
     birthdayToday: 'Happy birthday, {name}! 🎂',
     birthdaySoon: 'Birthday is coming soon! ({name})',
+    // --- OYUN METİNLERİ ---
+    gameTitle: 'Umbrella Rain Game',
+    gameNormal: 'Normal',
+    gameBonus: 'Bonus',
+    gameDanger: 'Danger',
+    gameScore: 'Score',
+    gameBest: 'Best',
+    gameOver: 'Game Over',
+    gameStart: 'Start Game!',
+    gameRestart: 'Tap to restart',
+    gameInstructions: 'Tap to open umbrella\nwhen raindrops fall!',
+    gameDropTypes: 'Blue = Normal (+1)\nGold = Bonus (+3)\nRed = Danger (+5 but risky!)',
+    gameRisk: 'but risky!',
+    // --- SHOP TEXTS ---
+    shop: 'Shop',
+    shopTitle: 'SHOP',
+    shopCoins: 'coins',
+    shopCharacters: 'Characters:',
+    shopUmbrellas: 'Umbrellas:',
+    shopClose: 'Close',
+    shopDefaultCharacter: 'Default Character',
+    shopNewCharacter: 'New Character',
+    shopWomanCharacter: 'Woman Character',
+    shopBusinessman: 'Businessman',
+    shopStudent: 'Student',
+    shopAstronaut: 'Astronaut',
+    shopDefaultUmbrella: 'Default Umbrella',
+    shopPurpleUmbrella: 'Purple Umbrella',
+    shopRainUmbrella: 'Rain Umbrella',
+    shopBeachUmbrella: 'Beach Umbrella',
+    shopSunUmbrella: 'Sun Umbrella',
+    shopGreenUmbrella: 'Green Umbrella',
+    shopRedUmbrella: 'Red Umbrella',
+    shopInsufficientFunds: 'Insufficient Funds!',
+    shopInsufficientMessage: 'You don\'t have enough money to buy this item.',
+    shopResetGame: 'Reset Game',
+    shopResetConfirm: 'All progress will be reset. Are you sure?',
+    shopResetSuccess: 'Game successfully reset!',
+    shopOkButton: 'OK',
+    shopYesButton: 'Yes',
+    shopNoButton: 'No',
+    shopSelected: 'Selected',
+    shopSelect: 'Select',
   },
   ja: {
     weather: '天気',
@@ -217,6 +304,7 @@ export const translations = {
     errorNoPermission: '位置情報の許可がありません',
     searchHelper: '都市、国、または地域名で検索できます。',
     tabHome: 'ホーム',
+    tabGame: 'ゲーム',
     tabSettings: '設定',
     settingsTitle: '設定',
     language: '言語',
@@ -246,6 +334,49 @@ export const translations = {
     thunderWarning: '雷雨にご注意ください、安全にお過ごしください！',
     birthdayToday: 'お誕生日おめでとう、{name}さん！🎂',
     birthdaySoon: 'もうすぐ誕生日です！({name}さん)',
+    // --- ゲームテキスト ---
+    gameTitle: '傘の雨ゲーム',
+    gameNormal: 'ノーマル',
+    gameBonus: 'ボーナス',
+    gameDanger: '危険',
+    gameScore: 'スコア',
+    gameBest: 'ベスト',
+    gameOver: 'ゲームオーバー',
+    gameStart: 'ゲーム開始!',
+    gameRestart: 'タップして再スタート',
+    gameInstructions: '雨粒が落ちてきたら\nタップして傘を開こう！',
+    gameDropTypes: '青 = ノーマル (+1)\n金 = ボーナス (+3)\n赤 = 危険 (+5 だがリスク有り!)',
+    gameRisk: 'だがリスク有り!',
+    // --- ショップテキスト ---
+    shop: 'ショップ',
+    shopTitle: 'ショップ',
+    shopCoins: 'ポイント',
+    shopCharacters: 'キャラクター:',
+    shopUmbrellas: '傘:',
+    shopClose: '閉じる',
+    shopDefaultCharacter: 'デフォルトキャラ',
+    shopNewCharacter: '新キャラ',
+    shopWomanCharacter: '女性キャラ',
+    shopBusinessman: 'ビジネスマン',
+    shopStudent: '学生',
+    shopAstronaut: '宇宙飛行士',
+    shopDefaultUmbrella: 'デフォルト傘',
+    shopPurpleUmbrella: '紫の傘',
+    shopRainUmbrella: '雨傘',
+    shopBeachUmbrella: 'ビーチ傘',
+    shopSunUmbrella: '日傘',
+    shopGreenUmbrella: '緑の傘',
+    shopRedUmbrella: '赤い傘',
+    shopInsufficientFunds: '資金不足！',
+    shopInsufficientMessage: 'このアイテムを購入するのに十分なお金がありません。',
+    shopResetGame: 'ゲームリセット',
+    shopResetConfirm: 'すべての進行状況がリセットされます。よろしいですか？',
+    shopResetSuccess: 'ゲームが正常にリセットされました！',
+    shopOkButton: 'OK',
+    shopYesButton: 'はい',
+    shopNoButton: 'いいえ',
+    shopSelected: '選択済み',
+    shopSelect: '選択',
   },
   de: {
     weather: 'Wetter',
@@ -264,6 +395,7 @@ export const translations = {
     errorNoPermission: 'Standortberechtigung verweigert',
     searchHelper: 'Sie können nach Stadt, Land oder Region suchen.',
     tabHome: 'Startseite',
+    tabGame: 'Spiel',
     tabSettings: 'Einstellungen',
     settingsTitle: 'Einstellungen',
     language: 'Sprache',
@@ -293,6 +425,49 @@ export const translations = {
     thunderWarning: 'Vorsicht vor Gewittern, bleiben Sie sicher!',
     birthdayToday: 'Alles Gute zum Geburtstag, {name}! 🎂',
     birthdaySoon: 'Bald ist Geburtstag! ({name})',
+    // --- SPIEL TEXTE ---
+    gameTitle: 'Regenschirm Regen Spiel',
+    gameNormal: 'Normal',
+    gameBonus: 'Bonus',
+    gameDanger: 'Gefahr',
+    gameScore: 'Punkte',
+    gameBest: 'Beste',
+    gameOver: 'Spiel Ende',
+    gameStart: 'Spiel starten!',
+    gameRestart: 'Tippen zum Neustart',
+    gameInstructions: 'Tippen Sie, um den Regenschirm zu öffnen\nwenn Regentropfen fallen!',
+    gameDropTypes: 'Blau = Normal (+1)\nGold = Bonus (+3)\nRot = Gefahr (+5 aber riskant!)',
+    gameRisk: 'aber riskant!',
+    // --- SHOP TEXTE ---
+    shop: 'Laden',
+    shopTitle: 'LADEN',
+    shopCoins: 'Punkte',
+    shopCharacters: 'Charaktere:',
+    shopUmbrellas: 'Regenschirme:',
+    shopClose: 'Schließen',
+    shopDefaultCharacter: 'Standard Charakter',
+    shopNewCharacter: 'Neuer Charakter',
+    shopWomanCharacter: 'Frau Charakter',
+    shopBusinessman: 'Geschäftsmann',
+    shopStudent: 'Student',
+    shopAstronaut: 'Astronaut',
+    shopDefaultUmbrella: 'Standard Schirm',
+    shopPurpleUmbrella: 'Lila Schirm',
+    shopRainUmbrella: 'Regen Schirm',
+    shopBeachUmbrella: 'Strand Schirm',
+    shopSunUmbrella: 'Sonnen Schirm',
+    shopGreenUmbrella: 'Grüner Schirm',
+    shopRedUmbrella: 'Roter Schirm',
+    shopInsufficientFunds: 'Unzureichende Mittel!',
+    shopInsufficientMessage: 'Sie haben nicht genug Geld, um diesen Artikel zu kaufen.',
+    shopResetGame: 'Spiel Zurücksetzen',
+    shopResetConfirm: 'Aller Fortschritt wird zurückgesetzt. Sind Sie sicher?',
+    shopResetSuccess: 'Spiel erfolgreich zurückgesetzt!',
+    shopOkButton: 'OK',
+    shopYesButton: 'Ja',
+    shopNoButton: 'Nein',
+    shopSelected: 'Ausgewählt',
+    shopSelect: 'Auswählen',
   },
   pt: {
     weather: 'Tempo',
@@ -311,6 +486,7 @@ export const translations = {
     errorNoPermission: 'Permissão de localização negada',
     searchHelper: 'Você pode pesquisar por cidade, país ou região.',
     tabHome: 'Início',
+    tabGame: 'Jogo',
     tabSettings: 'Configurações',
     settingsTitle: 'Configurações',
     language: 'Idioma',
@@ -340,6 +516,49 @@ export const translations = {
     thunderWarning: 'Cuidado com tempestades, fique seguro!',
     birthdayToday: 'Feliz aniversário, {name}! 🎂',
     birthdaySoon: 'O aniversário está chegando! ({name})',
+    // --- TEXTOS DO JOGO ---
+    gameTitle: 'Jogo da Chuva de Guarda-chuva',
+    gameNormal: 'Normal',
+    gameBonus: 'Bônus',
+    gameDanger: 'Perigo',
+    gameScore: 'Pontuação',
+    gameBest: 'Melhor',
+    gameOver: 'Fim de Jogo',
+    gameStart: 'Iniciar Jogo!',
+    gameRestart: 'Toque para recomeçar',
+    gameInstructions: 'Toque para abrir o guarda-chuva\nquando as gotas de chuva caírem!',
+    gameDropTypes: 'Azul = Normal (+1)\nOuro = Bônus (+3)\nVermelho = Perigo (+5 mas arriscado!)',
+    gameRisk: 'mas arriscado!',
+    // --- TEXTOS DA LOJA ---
+    shop: 'Loja',
+    shopTitle: 'LOJA',
+    shopCoins: 'pontos',
+    shopCharacters: 'Personagens:',
+    shopUmbrellas: 'Guarda-chuvas:',
+    shopClose: 'Fechar',
+    shopDefaultCharacter: 'Personagem Padrão',
+    shopNewCharacter: 'Novo Personagem',
+    shopWomanCharacter: 'Personagem Feminino',
+    shopBusinessman: 'Empresário',
+    shopStudent: 'Estudante',
+    shopAstronaut: 'Astronauta',
+    shopDefaultUmbrella: 'Guarda-chuva Padrão',
+    shopPurpleUmbrella: 'Guarda-chuva Roxo',
+    shopRainUmbrella: 'Guarda-chuva de Chuva',
+    shopBeachUmbrella: 'Guarda-sol de Praia',
+    shopSunUmbrella: 'Guarda-sol',
+    shopGreenUmbrella: 'Guarda-chuva Verde',
+    shopRedUmbrella: 'Guarda-chuva Vermelho',
+    shopInsufficientFunds: 'Fundos Insuficientes!',
+    shopInsufficientMessage: 'Você não tem dinheiro suficiente para comprar este item.',
+    shopResetGame: 'Resetar Jogo',
+    shopResetConfirm: 'Todo o progresso será resetado. Tem certeza?',
+    shopResetSuccess: 'Jogo resetado com sucesso!',
+    shopOkButton: 'OK',
+    shopYesButton: 'Sim',
+    shopNoButton: 'Não',
+    shopSelected: 'Selecionado',
+    shopSelect: 'Selecionar',
   },
 };
 
@@ -372,9 +591,6 @@ const CITY_LIST = [
 
 // Açıklamanın ilk harfini büyüten yardımcı fonksiyon
 const capitalize = (s: string) => s && s.length > 0 ? s.charAt(0).toUpperCase() + s.slice(1) : s;
-
-// Açıklamadaki tüm kelimelerin baş harfini büyüten yardımcı fonksiyon
-const capitalizeAll = (s: string) => s.replace(/\b\w/g, c => c.toUpperCase());
 
 // Gelişmiş arka plan hava durumu bildirimi task'i
 TaskManager.defineTask(WEATHER_TASK, async () => {
@@ -420,7 +636,7 @@ TaskManager.defineTask(WEATHER_TASK, async () => {
       }
     }
     return BackgroundFetch.BackgroundFetchResult.NewData;
-  } catch (e) {
+  } catch {
     return BackgroundFetch.BackgroundFetchResult.Failed;
   }
 });
@@ -486,10 +702,10 @@ const getWeatherLottie = (weatherMain: string, isNight: boolean) => {
 };
 
 export default function HomeScreen() {
-  const { theme, isDark } = useContext(ThemeContext);
-  const { lang, setLang } = useContext(LanguageContext);
+  const { isDark } = useContext(ThemeContext);
+  const { lang } = useContext(LanguageContext);
   const insets = useSafeAreaInsets();
-  const t = (key: keyof typeof translations['tr']) => translations[lang as Lang][key];
+  const t = useCallback((key: keyof typeof translations['tr']) => translations[lang as Lang][key], [lang]);
   const [city, setCity] = useState('');
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [forecast, setForecast] = useState<ForecastData | null>(null);
@@ -499,8 +715,7 @@ export default function HomeScreen() {
   const [citySuggestions, setCitySuggestions] = useState<string[]>([]);
   const [recentCities, setRecentCities] = useState<string[]>([]);
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [currentCityName, setCurrentCityName] = useState('');
-  const { location, errorMsg: locationError } = useCurrentLocation();
+  const { location } = useCurrentLocation();
   const [birthdays, setBirthdays] = useState<Birthday[]>([]);
   useEffect(() => {
     getBirthdays().then(setBirthdays);
@@ -546,7 +761,7 @@ export default function HomeScreen() {
       setWeather(data);
       const forecastData = await get5DayForecastByCity(favCity, lang);
       setForecast(forecastData);
-    } catch (err) {
+    } catch {
       setError(t('errorNoWeather'));
       setWeather(null);
       setForecast(null);
@@ -570,7 +785,7 @@ export default function HomeScreen() {
       const forecastData = await get5DayForecastByCity(searchCity, lang);
       setForecast(forecastData);
       await addRecentCity(searchCity);
-    } catch (err) {
+    } catch {
       // İlçe API'da yoksa büyükşehire yönlendir
       const lower = searchCity.toLowerCase();
       let fallbackCity = null;
@@ -621,7 +836,7 @@ export default function HomeScreen() {
       setWeather(data);
       const forecastData = await get5DayForecastByLocation(location.coords.latitude, location.coords.longitude, lang);
       setForecast(forecastData);
-    } catch (err) {
+    } catch {
       setError(t('errorNoLocation'));
       setWeather(null);
       setForecast(null);
@@ -737,7 +952,6 @@ export default function HomeScreen() {
     alignItems: 'center',
     justifyContent: 'center',
   });
-  const iconImageStyle = { width: 56, height: 56 };
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -787,7 +1001,7 @@ export default function HomeScreen() {
   // Şehir değiştiğinde güncelle
   useEffect(() => {
     if (weather?.name) {
-      setCurrentCityName(weather.name);
+      console.log('Weather updated for:', weather.name);
     }
   }, [weather]);
 
@@ -812,7 +1026,7 @@ export default function HomeScreen() {
         })
         .finally(() => setLoading(false));
     }
-  }, [location, city, lang]);
+  }, [location, city, lang, t]);
 
   const [tipIndex, setTipIndex] = useState(() => Math.floor(Math.random() * healthTips.length));
   useEffect(() => {
