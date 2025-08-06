@@ -15,13 +15,17 @@ Users can view real-time weather updates and 5-day forecasts based on city names
 
 - 🌐 Multi-language support (Turkish, English, Japanese, German, Portuguese)
 - 🎨 Theme selection (Light / Dark / Auto)
-- 📍 Weather based on current location
+- 📍 Weather based on current location with GPS support
 - 🔍 City search with suggestion system
 - ⭐ Save favorite cities
 - 🧾 3-hour and 5-day forecast support
 - 🎞️ Animated weather icons using Lottie
 - 🔐 Secure API key usage via `.env` file
-- 🎮 Mini game: Flappy Bird style game for entertainment
+- 🎮 Mini game: Umbrella Rain Catcher - Interactive tap-to-protect game
+- 🔔 Background weather notifications
+- 📱 Modern edge-to-edge design for Android
+- ⚡ Background services for real-time updates
+- 🔒 Location permissions for accurate weather data
 
 ---
 
@@ -32,6 +36,9 @@ Users can view real-time weather updates and 5-day forecasts based on city names
 - OpenWeatherMap API
 - AsyncStorage
 - Lottie (for animated weather icons)
+- Background Services (Android)
+- Location Services (GPS)
+- Push Notifications
 
 ---
 
@@ -50,6 +57,46 @@ Before running the project, you need to set up your environment variables.
    OPEN_WEATHER_API_KEY=your_openweathermap_api_key_here
 
 ⚠️ Important: Do NOT commit the .env file to your repository, as it contains sensitive information.
+
+## 🎮 Umbrella Rain Catcher Game
+
+**Interactive Rain Protection Game** - A unique mini-game that complements the weather theme perfectly! Protect your character from falling raindrops using an umbrella.
+
+### Game Features:
+- ☂️ **Tap-to-open umbrella mechanism** - Timing is everything!
+- 💧 **Three types of raindrops:**
+  - 💧 Normal drops (+1 point)
+  - ⭐ Bonus drops (+3 points) 
+  - ⚡ Danger drops (+5 points but risk game over)
+- 🛒 **In-game shop system** with coins earned from gameplay
+- 👤 **Multiple characters to unlock** (Default, Business, Student, Astronaut, etc.)
+- ☂️ **Various umbrella designs** (Classic, Purple, Beach, Sun umbrellas)
+- 🏆 **High score tracking** with persistent storage
+- 🌟 **Progressive difficulty** - Game gets faster as you score higher
+- 🎯 **Risk vs Reward** - Danger drops can break through umbrellas but give more points
+- 📱 **Haptic feedback** for enhanced mobile experience
+- 🌍 **Multi-language support** matching the main app
+
+### How to Play:
+1. Tap to open your umbrella when raindrops fall
+2. Catch drops to earn points and coins
+3. Avoid danger drops or catch them for high risk/reward
+4. Use coins to buy new characters and umbrellas
+5. Challenge your high score!
+
+## 📱 Permissions
+
+The app requires the following permissions:
+
+**iOS:**
+- Location access (when in use and background) for weather updates
+- Background app refresh for notifications
+
+**Android:**
+- Wake lock permission for background services
+- Foreground service permission for weather updates
+- Battery optimization exemption for reliable notifications
+- Location access for GPS-based weather data
 
 ## ⚙️ Installation
 
