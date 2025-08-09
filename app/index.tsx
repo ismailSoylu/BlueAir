@@ -33,7 +33,7 @@ export default function Index() {
       }
     }
     onReady();
-  }, [appIsReady]);
+  }, [appIsReady, router]);
 
   if (!appIsReady) {
     return null; // Splash açık, bekle

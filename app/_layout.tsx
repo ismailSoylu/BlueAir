@@ -5,9 +5,8 @@ import { useFonts } from 'expo-font';
 import * as Localization from 'expo-localization';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import * as SystemUI from 'expo-system-ui';
 import React, { useEffect, useRef, useState } from 'react';
-import { AppState, Platform } from 'react-native';
+import { AppState } from 'react-native';
 import 'react-native-reanimated';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { LanguageContext, ThemeContext } from './(tabs)/home';
@@ -33,11 +32,10 @@ export default function RootLayout() {
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
 
-  // ✅ Android için edge-to-edge arka plan
+  // ✅ Android için edge-to-edge arka plan - Modern API ile
   useEffect(() => {
-    if (Platform.OS === 'android') {
-      SystemUI.setBackgroundColorAsync('transparent');
-    }
+    // Edge-to-edge artık app.config.js ve plugin ile yönetiliyor
+    // Eski SystemUI API'si kaldırıldı
   }, []);
 
   // App State yönetimi

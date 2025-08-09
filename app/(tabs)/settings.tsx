@@ -217,7 +217,7 @@ export const translations: Record<string, Record<string, string>> = {
 // Doğum gününe kaç gün kaldığını hesaplayan fonksiyon
 const daysUntilBirthday = (dateStr: string) => {
   const today = new Date();
-  const [year, month, day] = dateStr.split('-').map(Number);
+  const [, month, day] = dateStr.split('-').map(Number);
   let next = new Date(today.getFullYear(), month - 1, day);
   if (next < today) next = new Date(today.getFullYear() + 1, month - 1, day);
   const diff = Math.ceil((next.getTime() - today.setHours(0,0,0,0)) / (1000 * 60 * 60 * 24));
@@ -256,7 +256,13 @@ export default function SettingsScreen() {
     }
     setAddError('');
     try {
-      await addBirthday({ id: simpleId(), name: bdayName.trim(), date: bdayDate.toISOString().slice(0, 10) });
+      // Timezone sorununu çözmek için local date string kullan
+      const year = bdayDate.getFullYear();
+      const month = String(bdayDate.getMonth() + 1).padStart(2, '0');
+      const day = String(bdayDate.getDate()).padStart(2, '0');
+      const dateString = `${year}-${month}-${day}`;
+      
+      await addBirthday({ id: simpleId(), name: bdayName.trim(), date: dateString });
       await scheduleBirthdayNotification(bdayDate, bdayName.trim(), lang);
       setBdayName('');
       setBdayDate(null);
@@ -323,7 +329,11 @@ export default function SettingsScreen() {
                   display="default"
                   onChange={(e: DateTimePickerEvent, date?: Date) => {
                     setShowDatePicker(false);
-                    if (date) setBdayDate(date);
+                    if (date) {
+                      // Timezone sorununu çözmek için tarihi local timezone'a ayarla
+                      const localDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+                      setBdayDate(localDate);
+                    }
                   }}
                   maximumDate={new Date()}
                 />

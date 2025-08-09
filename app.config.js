@@ -5,7 +5,7 @@ export default {
     name: "Blue Air",
     displayName: "Blue Air",
     slug: "blueAir",
-    version: "1.0.9",
+    version: "1.0.10",
     orientation: "default",
     icon: "./assets/images/icon.png",
     scheme: "blueair",
@@ -29,21 +29,16 @@ export default {
         backgroundColor: "#000000"
       },
 
-      // ✅ Edge-to-Edge uyumluluk
-      edgeToEdgeEnabled: true, // API 35 için zorunlu
-      statusBar: {
-        translucent: true,
-        backgroundColor: "transparent", // Tam şeffaf status bar
-        barStyle: "light-content"
-      },
-      navigationBar: {
-        visible: true,
-        backgroundColor: "#000000",
-        barStyle: "light"
-      },
-
+      // ✅ Android 15 Edge-to-Edge uyumluluk
+      compileSdkVersion: 35,
+      targetSdkVersion: 35,
+      edgeToEdgeEnabled: true,
+      
+      // ❌ Eski API'ler kaldırıldı - Android 15 uyumluluğu için
+      // statusBar ve navigationBar ayarları artık react-native-edge-to-edge ile yapılacak
+      
       package: "com.ismailjacob.blueAir",
-      versionCode: 14,
+      versionCode: 15, // Version code artırıldı
 
       allowBackup: true,
       softwareKeyboardLayoutMode: "pan",
@@ -78,6 +73,15 @@ export default {
           image: "./assets/images/splash.png",
           resizeMode: "contain",
           backgroundColor: "#1B2A40"
+        }
+      ],
+      [
+        "react-native-edge-to-edge",
+        {
+          android: {
+            enforceEdgeToEdge: true,
+            hideNavigationBarAndroid: false
+          }
         }
       ]
     ],

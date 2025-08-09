@@ -2,18 +2,21 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Haptics from 'expo-haptics';
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import {
-    Animated,
-    Dimensions,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    TouchableWithoutFeedback,
-    View
+  Animated,
+  Dimensions,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View
 } from 'react-native';
 import { LanguageContext, translations } from './home';
 
 const { width, height } = Dimensions.get('window');
+
+// React Native için timer type
+type TimerId = ReturnType<typeof setTimeout>;
 
 export default function UmbrellaTapGame() {
   const { lang } = useContext(LanguageContext);
@@ -35,9 +38,9 @@ export default function UmbrellaTapGame() {
   const [showInsufficientFunds, setShowInsufficientFunds] = useState(false); // Yetersiz para uyarısı
 
   const dropY = useRef(new Animated.Value(0)).current;
-  const umbrellaTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const umbrellaTimeoutRef = useRef<TimerId | null>(null);
   const isDropFallingRef = useRef(false);
-  const gameLoopRef = useRef<NodeJS.Timeout | null>(null);
+  const gameLoopRef = useRef<TimerId | null>(null);
   const currentDropYRef = useRef(0);
   const umbrellaOpenRef = useRef(false); // Real-time şemsiye durumu
   const gameOverRef = useRef(false); // Real-time game over durumu
@@ -528,7 +531,7 @@ export default function UmbrellaTapGame() {
     if (!showShop && gameStarted && !gameOver && !isDropFallingRef.current) {
       console.log('🔄 useEffect backup - Shop closed, resuming game...');
       
-      const timer = setTimeout(() => {
+      const timer: TimerId = setTimeout(() => {
         if (!gameOverRef.current && gameStarted && !showShop && !isDropFallingRef.current) {
           console.log('🌧️ useEffect backup - Force resuming drop, score:', score);
           dropY.setValue(0);
