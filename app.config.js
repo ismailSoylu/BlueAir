@@ -5,7 +5,7 @@ export default {
     name: "Blue Air",
     displayName: "Blue Air",
     slug: "blueAir",
-    version: "1.0.10",
+    version: "1.1.1",
     orientation: "default",
     icon: "./assets/images/icon.png",
     scheme: "blueair",
@@ -38,7 +38,7 @@ export default {
       // statusBar ve navigationBar ayarları artık react-native-edge-to-edge ile yapılacak
       
       package: "com.ismailjacob.blueAir",
-      versionCode: 15, // Version code artırıldı
+      versionCode: 16, // Version code artırıldı
 
       allowBackup: true,
       softwareKeyboardLayoutMode: "pan",
