@@ -1,13 +1,15 @@
 # 🌦️ BlueAir - Weather Forecast App
 
 ![Platform](https://img.shields.io/badge/platform-React%20Native-blue)
-![Framework](https://img.shields.io/badge/framework-Expo-green)
+![Framework](https://img.shields.io/badge/framework-React%20Native%20CLI-green)
 ![Language](https://img.shields.io/badge/language-TypeScript-blue)
 ![License](https://img.shields.io/badge/license-MIT-brightgreen)
 ![Status](https://img.shields.io/badge/status-active-success)
+![Monetization](https://img.shields.io/badge/ads-AdMob-orange)
 
-**BlueAir** is a modern weather forecast app developed using React Native and TypeScript.  
-Users can view real-time weather updates and 5-day forecasts based on city names or their current location.
+**BlueAir** is a modern weather forecast app developed using React Native CLI (migrated from Expo) and TypeScript.  
+Users can view real-time weather updates and 5-day forecasts based on city names or their current location.  
+The app includes AdMob banner ads for monetization and is ready for Play Store distribution.
 
 ---
 
@@ -26,12 +28,17 @@ Users can view real-time weather updates and 5-day forecasts based on city names
 - 📱 Modern edge-to-edge design for Android
 - ⚡ Background services for real-time updates
 - 🔒 Location permissions for accurate weather data
+- 🎯 **AdMob Banner Ads** - Monetization with Google AdMob integration
+- 📦 **React Native CLI Build** - Migrated from Expo managed workflow to bare React Native
+- 🔧 **Production Ready** - Configured with proper signing keys for Play Store submission
+- 🎨 **Optimized UX** - Single banner ad positioned strategically above tab bar
+- 🛡️ **Secure Codebase** - Sensitive data properly excluded from version control
 
 ---
 
 ## 📦 Technologies Used
 
-- React Native (Expo)
+- React Native CLI 0.79.5 (migrated from Expo)
 - TypeScript
 - OpenWeatherMap API
 - AsyncStorage
@@ -39,6 +46,9 @@ Users can view real-time weather updates and 5-day forecasts based on city names
 - Background Services (Android)
 - Location Services (GPS)
 - Push Notifications
+- **Google Mobile Ads SDK** - react-native-google-mobile-ads
+- **AdMob Integration** - Banner ads with test/production environment switching
+- **Android Gradle Build System** - Version 8.13 with proper signing configuration
 
 ---
 
@@ -50,13 +60,42 @@ Before running the project, you need to set up your environment variables.
 
    ```bash
    cp .env.example .env
+   ```
 
-2. Open the .env file and replace the placeholder with your actual OpenWeatherMap API key:
+2. Open the .env file and replace the placeholders with your actual API keys:
 
    ```bash
    OPEN_WEATHER_API_KEY=your_openweathermap_api_key_here
+   ADMOB_APP_ID=ca-app-pub-xxxxxxxxxxxxxxxx~xxxxxxxxxx
+   ADMOB_BANNER_ID=ca-app-pub-xxxxxxxxxxxxxxxx/xxxxxxxxxx
+   ```
 
-⚠️ Important: Do NOT commit the .env file to your repository, as it contains sensitive information.
+⚠️ **Important**: 
+- Do NOT commit the `.env` file to your repository, as it contains sensitive information
+- The app uses test AdMob IDs in development mode and switches to production IDs in release builds
+- For AdMob setup, see the detailed guide in `README_ADMOB.md`
+
+## 🎯 AdMob Integration
+
+The app includes Google AdMob banner advertisements for monetization:
+
+### Features:
+- 🎯 **Strategic Placement** - Single banner positioned above the tab bar for optimal user experience
+- 🔄 **Environment Switching** - Automatically uses test ads in development, production ads in release
+- 📱 **Responsive Design** - Banner adapts to different screen sizes with proper safe area handling
+- ⚡ **Performance Optimized** - Minimal impact on app performance with efficient ad loading
+- 🛡️ **Error Handling** - Graceful fallback when ads fail to load
+
+### Setup:
+1. Configure your AdMob account and app
+2. Update your `.env` file with production AdMob IDs
+3. The app automatically handles test/production switching based on build type
+
+### Ad Placement:
+- **Position**: Above the bottom tab navigation
+- **Size**: Standard banner (320x50)
+- **Visibility**: Persistent across all app tabs
+- **UX Impact**: Minimal disruption to content with proper padding adjustments
 
 ## 🎮 Umbrella Rain Catcher Game
 
@@ -98,14 +137,80 @@ The app requires the following permissions:
 - Battery optimization exemption for reliable notifications
 - Location access for GPS-based weather data
 
-## ⚙️ Installation
+## ⚙️ Installation & Setup
 
+### Prerequisites
+- Node.js 18+ 
+- React Native CLI
+- Android Studio (for Android development)
+- Xcode (for iOS development, macOS only)
+
+### Development Setup
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/ismailsoylu/BlueAir.git
+   cd BlueAir
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Set up environment variables**
+   ```bash
+   cp .env.example .env
+   # Edit .env with your actual API keys
+   ```
+
+4. **Install iOS dependencies** (macOS only)
+   ```bash
+   cd ios && pod install && cd ..
+   ```
+
+### Running the App
+
+**Android:**
 ```bash
-git clone https://github.com/ismailsoylu/BlueAir.git
-cd BlueAir
-npm install
-npx expo start
+npx react-native run-android
 ```
+
+**iOS:**
+```bash
+npx react-native run-ios
+```
+
+### Building for Production
+
+**Android APK:**
+```bash
+cd android
+./gradlew assembleRelease
+```
+
+**Android AAB (Play Store):**
+```bash
+cd android
+./gradlew bundleRelease
+```
+
+**iOS:**
+```bash
+# Use Xcode to build and archive for App Store
+```
+
+### AdMob Configuration
+
+For detailed AdMob setup instructions, see [README_ADMOB.md](README_ADMOB.md)
+
+### Migration from Expo
+
+This project was migrated from Expo managed workflow to React Native CLI using `expo prebuild`. The migration includes:
+- Native Android and iOS project files
+- Custom keystore configuration for Play Store
+- AdMob native integration
+- Proper build configurations for production deployment
 
 ---
 
