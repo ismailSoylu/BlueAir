@@ -18,6 +18,25 @@ expo-env.d.ts
 *.key
 *.mobileprovision
 
+# Android build files and sensitive data
+android/app/build/
+android/app/src/debug/
+android/app/src/release/
+android/.gradle/
+android/gradle/
+android/gradlew*
+android/local.properties
+android/app/google-services.json
+android/app/src/main/assets/
+android/app/src/main/res/raw/
+
+# Keystore files (sensitive)
+*.keystore
+@ismailjacob__blueAir.jks
+
+# AdMob and API keys (already covered by .env but adding for clarity)
+# These should be in .env files which are already ignored
+
 # Metro
 .metro-health-check*
 

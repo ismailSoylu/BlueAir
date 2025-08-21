@@ -910,6 +910,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#87ceeb',
     alignItems: 'center',
     justifyContent: 'flex-start',
+    paddingBottom: 60, // Banner için alan bırak
   },
   drop: {
     position: 'absolute',
@@ -958,7 +959,7 @@ const styles = StyleSheet.create({
   },
   scoreContainer: {
     position: 'absolute',
-    bottom: 20,
+    bottom: 80, // Banner kaldırıldığı için tekrar aşağı indirdik
     right: 20,
     alignItems: 'flex-end',
     backgroundColor: 'rgba(0,0,0,0.6)',

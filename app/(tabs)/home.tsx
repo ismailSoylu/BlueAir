@@ -1078,7 +1078,7 @@ export default function HomeScreen() {
             position: 'absolute',
             top: 0, left: 0, right: 0, zIndex: 1
           }} />
-          <ScrollView contentContainerStyle={{ paddingBottom: 40, paddingHorizontal: 8 }} showsVerticalScrollIndicator={false}>
+          <ScrollView contentContainerStyle={{ paddingBottom: 100, paddingHorizontal: 8 }} showsVerticalScrollIndicator={false}>
             <Text style={[styles.title, isDark && styles.darkText]} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>{t('weather')}</Text>
             <Text style={{textAlign: 'center', fontSize: 15, color: isDark ? '#fff' : '#222', marginBottom: 4, minWidth: 0, maxWidth: '100%', flexShrink: 1}} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>
               {currentTime.toLocaleTimeString()}

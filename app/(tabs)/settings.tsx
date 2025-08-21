@@ -284,7 +284,7 @@ export default function SettingsScreen() {
       style={{ flex: 1 }}
     >
       <SafeAreaView style={{ flex: 1 }}>
-        <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }} showsVerticalScrollIndicator={false}>
+        <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', paddingBottom: 100 }} showsVerticalScrollIndicator={false}>
           <View style={[styles.card, isDark && styles.darkCard]}>
             <Text style={[styles.title, isDark && styles.darkText]} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>{t('settingsTitle')}</Text>
             {/* --- DOĞUM GÜNÜ EKLEME --- */}

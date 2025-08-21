@@ -7,6 +7,7 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useRef, useState } from 'react';
 import { AppState } from 'react-native';
+import mobileAds from 'react-native-google-mobile-ads';
 import 'react-native-reanimated';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { LanguageContext, ThemeContext } from './(tabs)/home';
@@ -31,6 +32,18 @@ export default function RootLayout() {
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
+
+  // AdMob initialization
+  useEffect(() => {
+    mobileAds()
+      .initialize()
+      .then(() => {
+        console.log('AdMob initialized');
+      })
+      .catch((error) => {
+        console.log('AdMob initialization error:', error);
+      });
+  }, []);
 
   // ✅ Android için edge-to-edge arka plan - Modern API ile
   useEffect(() => {
