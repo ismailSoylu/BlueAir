@@ -14,6 +14,7 @@ const simpleId = () => Math.random().toString(36).substr(2, 9) + Date.now();
 const THEME_KEY = 'APP_THEME';
 
 const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=com.ismailjacob.blueAir';
+const DEVELOPER_PLAY_STORE_URL = 'https://play.google.com/store/apps/developer?id=Nova+Orion';
 
 // translations tipini genişlet
 export const translations: Record<string, Record<string, string>> = {
@@ -55,6 +56,8 @@ export const translations: Record<string, Record<string, string>> = {
     birthdayDatePlaceholder: 'Tarih',
     birthdayAddError: 'Lütfen isim ve tarih girin',
     daysLeft: '{days} gün kaldı',
+    allApps: 'Tüm Uygulamalarımız',
+    allAppsDescription: 'Diğer uygulamalarımızı keşfedin',
   },
   en: {
     weather: 'Weather',
@@ -94,6 +97,8 @@ export const translations: Record<string, Record<string, string>> = {
     birthdayDatePlaceholder: 'Date',
     birthdayAddError: 'Please enter a name and date',
     daysLeft: '{days} days left',
+    allApps: 'All Our Apps',
+    allAppsDescription: 'Discover our other apps',
   },
   ja: {
     weather: '天気',
@@ -133,6 +138,8 @@ export const translations: Record<string, Record<string, string>> = {
     birthdayDatePlaceholder: '日付',
     birthdayAddError: '名前と日付を入力してください',
     daysLeft: 'あと{days}日',
+    allApps: '全てのアプリ',
+    allAppsDescription: '他のアプリを見つける',
   },
   de: {
     weather: 'Wetter',
@@ -172,6 +179,8 @@ export const translations: Record<string, Record<string, string>> = {
     birthdayDatePlaceholder: 'Datum',
     birthdayAddError: 'Bitte Name und Datum eingeben',
     daysLeft: 'Noch {days} Tage',
+    allApps: 'Alle unsere Apps',
+    allAppsDescription: 'Entdecken Sie unsere anderen Apps',
   },
   pt: {
     weather: 'Tempo',
@@ -211,6 +220,8 @@ export const translations: Record<string, Record<string, string>> = {
     birthdayDatePlaceholder: 'Data',
     birthdayAddError: 'Por favor, digite um nome e uma data',
     daysLeft: 'Faltam {days} dias',
+    allApps: 'Todos os Nossos Apps',
+    allAppsDescription: 'Descubra nossos outros aplicativos',
   },
 };
 
@@ -236,6 +247,10 @@ export default function SettingsScreen() {
 
   const openPlayStore = () => {
     Linking.openURL(PLAY_STORE_URL);
+  };
+
+  const openDeveloperStore = () => {
+    Linking.openURL(DEVELOPER_PLAY_STORE_URL);
   };
 
   const [bdayName, setBdayName] = useState('');
@@ -430,7 +445,28 @@ export default function SettingsScreen() {
                 </Text>
               </TouchableOpacity>
             </View>
+            <View style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <MaterialCommunityIcons name="google-play" size={22} color={isDark ? '#b3c6f7' : '#007AFF'} style={{ marginRight: 8 }} />
+                <Text style={[styles.label, isDark && styles.darkText]} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>{t('allApps')}</Text>
+              </View>
+              <Text style={[styles.allAppsDescription, isDark && styles.darkText]} allowFontScaling numberOfLines={2} adjustsFontSizeToFit>
+                {t('allAppsDescription')}
+              </Text>
+              <TouchableOpacity 
+                style={[styles.allAppsButton, isDark && styles.darkAllAppsButton]} 
+                onPress={openDeveloperStore}
+              >
+                <MaterialCommunityIcons name="google-play" size={20} color="#fff" style={{ marginRight: 8 }} />
+                <Text style={[styles.allAppsButtonText]} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>
+                  {t('allApps')}
+                </Text>
+              </TouchableOpacity>
+            </View>
             <Text style={[styles.info, isDark && styles.darkText]} allowFontScaling numberOfLines={3} adjustsFontSizeToFit>{t('info')}</Text>
+            <Text style={[styles.brandText, isDark && styles.darkBrandText]} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>
+              Nova Orion
+            </Text>
           </View>
         </ScrollView>
       </SafeAreaView>
@@ -527,5 +563,41 @@ const styles = StyleSheet.create({
   },
   darkRateButtonText: {
     color: '#fff',
+  },
+  allAppsDescription: {
+    fontSize: 14,
+    color: '#666',
+    textAlign: 'center',
+    marginBottom: 12,
+    marginHorizontal: 10,
+  },
+  allAppsButton: {
+    backgroundColor: '#4CAF50',
+    borderRadius: 20,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    alignSelf: 'center',
+    marginBottom: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  darkAllAppsButton: {
+    backgroundColor: '#2E7D32',
+  },
+  allAppsButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 15,
+    textAlign: 'center',
+  },
+  brandText: {
+    fontSize: 11,
+    color: '#999',
+    textAlign: 'center',
+    marginTop: 12,
+    fontStyle: 'italic',
+  },
+  darkBrandText: {
+    color: '#777',
   },
 }); 
