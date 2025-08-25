@@ -1323,52 +1323,59 @@ export default function HomeScreen() {
                 })()}
               </>
             )}
-            {/* 5 günlük tahmin: tekrar uyarı kutularının ALTINA aldık */}
+            {/* 5 günlük tahmin: kompakt tasarım */}
             {forecast && (
-              <View style={styles.forecastContainer}>
+              <View style={styles.compactForecastContainer}>
                 <Text style={[styles.forecastTitle, isDark && styles.darkText]} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>{t('forecast5')}</Text>
-                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                  {getDailyForecast(forecast.list).map(item => {
+                <View style={[styles.compactForecastCard, isDark && styles.darkCompactCard]}>
+                  {getDailyForecast(forecast.list).map((item, index) => {
                     const isNight = isForecastNight(item.dt);
-                    // Doğum günü kontrolü
                     const forecastDate = new Date(item.dt_txt);
-                    const forecastStr = forecastDate.toISOString().slice(5, 10); // MM-DD
+                    const forecastStr = forecastDate.toISOString().slice(5, 10);
                     const bday = birthdays.find(b => b.date.slice(5, 10) === forecastStr);
                     return (
-                      <View style={styles.modernForecastItem} key={item.dt}>
-                        <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                          <Text style={styles.modernForecastDay} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>{forecastDate.toLocaleDateString(lang === 'de' ? 'de-DE' : lang === 'ja' ? 'ja-JP' : lang === 'en' ? 'en-US' : lang === 'pt' ? 'pt-PT' : 'tr-TR', { weekday: 'short', day: 'numeric', month: 'short' })}</Text>
+                      <View key={item.dt} style={[styles.compactForecastRow, index < getDailyForecast(forecast.list).length - 1 && styles.compactForecastBorder, isDark && index < getDailyForecast(forecast.list).length - 1 && styles.darkCompactForecastBorder]}>
+                        <View style={styles.compactDateColumn}>
+                          <Text style={[styles.compactDate, isDark && styles.darkText]} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>
+                            {forecastDate.toLocaleDateString(lang === 'de' ? 'de-DE' : lang === 'ja' ? 'ja-JP' : lang === 'en' ? 'en-US' : lang === 'pt' ? 'pt-PT' : 'tr-TR', { day: 'numeric', month: 'short' })}
+                          </Text>
+                          <Text style={[styles.compactDay, isDark && styles.darkSecondaryText]} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>
+                            {forecastDate.toLocaleDateString(lang === 'de' ? 'de-DE' : lang === 'ja' ? 'ja-JP' : lang === 'en' ? 'en-US' : lang === 'pt' ? 'pt-PT' : 'tr-TR', { weekday: 'short' })}
+                          </Text>
                           {bday && (
-                            <MaterialCommunityIcons name="cake-variant" size={18} color="#ffb347" style={{ marginLeft: 4 }} />
+                            <MaterialCommunityIcons name="cake-variant" size={12} color="#ffb347" />
                           )}
                         </View>
-                        <View style={getModernForecastIconStyle(isDark)}>
-                          <LottieView
-                            source={getWeatherLottie(item.weather[0].main, isNight)}
-                            autoPlay
-                            loop
-                            style={{ width: 56, height: 56 }}
-                          />
+                        <View style={styles.compactIconColumn}>
+                          <View style={[styles.compactIconContainer, isDark && styles.darkCompactIconContainer]}>
+                            <LottieView
+                              source={getWeatherLottie(item.weather[0].main, isNight)}
+                              autoPlay
+                              loop
+                              style={{ width: 32, height: 32 }}
+                            />
+                          </View>
                         </View>
-                        <Text style={styles.modernForecastTemp} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>{Math.round(item.main.temp)}°C</Text>
-                        <Text style={styles.modernForecastDesc} numberOfLines={2} ellipsizeMode="tail" allowFontScaling adjustsFontSizeToFit>{formatDescription(item.weather[0].description)}</Text>
-                        {bday && (
-                          <Text style={{ color: '#ff9800', fontWeight: 'bold', fontSize: 12, marginTop: 2 }}>
-                            {t('birthdaySoon').replace('{name}', bday.name)}
+                        <View style={styles.compactTempColumn}>
+                          <Text style={[styles.compactTemp, isDark && styles.darkText]} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>
+                            {Math.round(item.main.temp)}°
                           </Text>
-                        )}
+                          <Text style={[styles.compactTempUnit, isDark && styles.darkSecondaryText]} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>
+                            C
+                          </Text>
+                        </View>
                       </View>
                     );
                   })}
-                </ScrollView>
+                </View>
               </View>
             )}
-            {/* 3 saatlik tahmin */}
+            {/* 3 saatlik tahmin: yatay kompakt tasarım */}
             {forecast && (
-              <View style={[styles.hourlyCard, isDark && styles.darkHourlyCard, { width: '100%', alignSelf: 'center', marginTop: 12 }]}> 
+              <View style={styles.compactForecastContainer}>
                 <Text style={[styles.forecastTitle, isDark && styles.darkText]} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>{t('forecast3h')}</Text>
                 {forecast.list && forecast.list.length > 0 ? (
-                  <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.hourlyScrollContainer}>
                     {forecast.list.slice(0, 8).map(item => {
                       const utcDate = new Date(item.dt * 1000);
                       const utcHour = utcDate.getUTCHours();
@@ -1389,18 +1396,21 @@ export default function HomeScreen() {
                         isNight = !(localHour >= 9 && localHour < 21);
                       }
                       return (
-                        <View style={styles.modernForecastItem} key={item.dt + '-hourly'}>
-                          <Text style={styles.modernForecastDay} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>{new Date(item.dt_txt).toLocaleTimeString(lang === 'de' ? 'de-DE' : lang === 'ja' ? 'ja-JP' : lang === 'en' ? 'en-US' : 'tr-TR', { hour: '2-digit', minute: '2-digit' })}</Text>
-                          <View style={getModernForecastIconStyle(isDark)}>
+                        <View style={[styles.compactHourlyItem, isDark && styles.darkCompactHourlyItem]} key={item.dt + '-hourly'}>
+                          <Text style={[styles.compactHourlyTime, isDark && styles.darkSecondaryText]} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>
+                            {new Date(item.dt_txt).toLocaleTimeString(lang === 'de' ? 'de-DE' : lang === 'ja' ? 'ja-JP' : lang === 'en' ? 'en-US' : 'tr-TR', { hour: '2-digit', minute: '2-digit' })}
+                          </Text>
+                          <View style={styles.compactHourlyIconContainer}>
                             <LottieView
                               source={getWeatherLottie(item.weather[0].main, isNight)}
                               autoPlay
                               loop
-                              style={{ width: 56, height: 56 }}
+                              style={{ width: 28, height: 28 }}
                             />
                           </View>
-                          <Text style={styles.modernForecastTemp} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>{Math.round(item.main.temp)}°C</Text>
-                          <Text style={styles.modernForecastDesc} numberOfLines={2} ellipsizeMode="tail" allowFontScaling adjustsFontSizeToFit>{formatDescription(item.weather?.[0]?.description || '')}</Text>
+                          <Text style={[styles.compactHourlyTemp, isDark && styles.darkText]} allowFontScaling numberOfLines={1} adjustsFontSizeToFit>
+                            {Math.round(item.main.temp)}°
+                          </Text>
                         </View>
                       );
                     })}
@@ -1697,5 +1707,117 @@ const styles = StyleSheet.create({
   darkInput: {
     backgroundColor: '#232a36',
     color: '#fff',
+  },
+  // Kompakt tahmin stilleri
+  compactForecastContainer: {
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  compactForecastCard: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 16,
+    shadowColor: '#007AFF',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  darkCompactCard: {
+    backgroundColor: '#232a36',
+  },
+  compactForecastRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    justifyContent: 'space-between',
+  },
+  compactForecastBorder: {
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  darkCompactForecastBorder: {
+    borderBottomColor: '#3a424f',
+  },
+  compactDateColumn: {
+    flex: 2,
+    alignItems: 'flex-start',
+  },
+  compactDate: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#222',
+  },
+  compactDay: {
+    fontSize: 14,
+    color: '#666',
+    marginTop: 2,
+  },
+  compactIconColumn: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  compactIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#f8f9fa',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  darkCompactIconContainer: {
+    backgroundColor: '#2a3441',
+  },
+  compactTempColumn: {
+    flex: 1,
+    alignItems: 'flex-end',
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+  },
+  compactTemp: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#222',
+  },
+  compactTempUnit: {
+    fontSize: 16,
+    color: '#666',
+    marginLeft: 2,
+  },
+  darkSecondaryText: {
+    color: '#b3c6f7',
+  },
+  // Saatlik tahmin kompakt stilleri
+  hourlyScrollContainer: {
+    marginTop: 8,
+  },
+  compactHourlyItem: {
+    alignItems: 'center',
+    marginRight: 16,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    backgroundColor: '#f8f9fa',
+    borderRadius: 12,
+    minWidth: 60,
+  },
+  compactHourlyTime: {
+    fontSize: 12,
+    color: '#666',
+    marginBottom: 4,
+  },
+  compactHourlyIconContainer: {
+    width: 32,
+    height: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 4,
+  },
+  compactHourlyTemp: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#222',
+  },
+  darkCompactHourlyItem: {
+    backgroundColor: '#2a3441',
   },
 });

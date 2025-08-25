@@ -92,8 +92,8 @@ android {
         applicationId 'com.ismailjacob.blueAir'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 25
-        versionName "1.1.9"
+        versionCode 26
+        versionName "1.2.0"
     }
     signingConfigs {
         debug {
